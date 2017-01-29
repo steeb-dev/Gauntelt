@@ -16,7 +16,8 @@ public class MoveBehaviour : GenericBehaviour
     private int attack1Bool;                       // Animator variable related to whether or not the player is on ground.
  	private bool jump;                              // Boolean to determine whether or not the player started a jump.
     private bool attack1 = false;
- 
+    public BatController m_Bat;
+
     // Start is always called after any Awake functions.
     void Start() 
 	{
@@ -39,8 +40,10 @@ public class MoveBehaviour : GenericBehaviour
         if (Input.GetButtonDown("Fire1"))
         {
             anim.SetTrigger("Attack");
+            m_Bat.Attack();
         }
 	}
+    
 
 	// LocalFixedUpdate overrides the virtual function of the base class.
 	public override void LocalFixedUpdate()

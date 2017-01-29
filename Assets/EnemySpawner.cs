@@ -7,11 +7,19 @@ public class EnemySpawner : MonoBehaviour {
     public GameObject m_Enemy;
     private float m_Timer = 0f;
     private ParticleSystem m_PSys;
+    public float m_HP;
+    private MeshRenderer m_MeshRenderer;
 
-	// Use this for initialization
-	void Start () {
+    public Color m_DefaultColor;
+    public Color m_HitColor;
+    public float m_HitFlashTime = 0.2f;
+
+    // Use this for initialization
+    void Start () {
         m_PSys = GetComponent<ParticleSystem>();
-	}
+        m_MeshRenderer = GetComponent<MeshRenderer>();
+        m_MeshRenderer.materials[0].color = m_DefaultColor;
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -22,6 +30,46 @@ public class EnemySpawner : MonoBehaviour {
             m_PSys.Emit(500);
             GameObject go = Instantiate(m_Enemy);
             go.transform.position = this.transform.position - new Vector3(0,0,1f);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Weapon")
+        {
+            StartCoroutine(Hit());
+            m_PSys.Emit(20);
+            BatController bc = other.gameObject.GetComponent<BatController>();
+            this.m_HP -= (int)bc.GetDamage();
+         
+            m_PSys.Emit(100);
+
+            if (m_HP <= 0)
+            {
+                StopAllCoroutines();
+                //m_Anim.SetBool("Dead", true);
+                StartCoroutine(KillAfterDeath());
+            }
+        }
+    }
+
+
+    IEnumerator KillAfterDeath()
+    {
+        m_MeshRenderer.materials[0].color = m_HitColor;
+        yield return new WaitForSeconds(0.1f);
+        Destroy(this);
+    }
+
+    IEnumerator Hit()
+    {
+        float t = 0;
+        m_MeshRenderer.materials[0].color = m_HitColor;
+        while (t < m_HitFlashTime)
+        {
+            m_MeshRenderer.materials[0].color = Color.Lerp(m_HitColor, m_DefaultColor, t / m_HitFlashTime);
+            t += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
         }
     }
 }
