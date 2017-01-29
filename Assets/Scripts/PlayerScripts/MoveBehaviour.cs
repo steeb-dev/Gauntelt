@@ -13,16 +13,18 @@ public class MoveBehaviour : GenericBehaviour
 	private float speed;                            // Moving speed.
 	private int jumpBool;                           // Animator variable related to jumping.
 	private int groundedBool;                       // Animator variable related to whether or not the player is on ground.
-	private bool run;                               // Boolean to determine whether or not the player activated the run mode.
-	private bool jump;                              // Boolean to determine whether or not the player started a jump.
-
-	// Start is always called after any Awake functions.
-	void Start() 
+    private int attack1Bool;                       // Animator variable related to whether or not the player is on ground.
+ 	private bool jump;                              // Boolean to determine whether or not the player started a jump.
+    private bool attack1 = false;
+ 
+    // Start is always called after any Awake functions.
+    void Start() 
 	{
 		// Set up the references.
 		jumpBool = Animator.StringToHash("Jump");
 		groundedBool = Animator.StringToHash("Grounded");
-		anim.SetBool (groundedBool, true);
+        attack1Bool = Animator.StringToHash("Attack1");
+        anim.SetBool (groundedBool, true);
 
 		// Subscribe and register this behaviour as the default behaviour.
 		behaviourManager.SubscribeBehaviour (this);
@@ -32,21 +34,25 @@ public class MoveBehaviour : GenericBehaviour
 	// Update is used to set features regardless the active behaviour.
 	void Update ()
 	{
-		// Activate run by input.
-		run = Input.GetButton ("Run");
 		if(Input.GetButtonDown ("Jump"))
 			jump = true;
+        if (Input.GetButtonDown("Fire1"))
+        {
+            attack1 = true;
+        }
 	}
 
 	// LocalFixedUpdate overrides the virtual function of the base class.
 	public override void LocalFixedUpdate()
 	{
 		// Call the basic movement manager.
-		MovementManagement (behaviourManager.GetH, behaviourManager.GetV, run);
+		MovementManagement (behaviourManager.GetH, behaviourManager.GetV, true);
 
 		// Call the jump manager.
 		JumpManagement();
-	}
+        AttackManagement();
+
+    }
 
 	// Execute the idle and walk/run jump movements.
 	void JumpManagement()
@@ -71,8 +77,37 @@ public class MoveBehaviour : GenericBehaviour
 		}
 	}
 
-	// Deal with the basic player movement
-	void MovementManagement(float horizontal, float vertical, bool running)
+    void AttackManagement()
+    {
+
+        if (attack1)
+        {
+            // Set jump boolean on the Animator controller.
+            anim.SetBool(attack1Bool, true);
+            attack1 = false;
+        }
+        else if (anim.GetBool(attack1Bool) && !IsAttacking())
+        {
+            anim.SetBool(attack1Bool, false);
+        }
+
+    }
+
+    bool IsAttacking()
+    {
+        if (anim.IsInTransition(0))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    // Deal with the basic player movement
+    void MovementManagement(float horizontal, float vertical, bool running)
 	{
 		// On ground, obey gravity.
 		if (anim.GetBool(groundedBool))
