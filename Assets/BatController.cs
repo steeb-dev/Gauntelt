@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class BatController : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+    public float m_MinDamage;
+    public float m_MaxDamage;
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
@@ -13,4 +16,9 @@ public class BatController : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public float GetDamage()
+    {
+        return Random.Range(m_MaxDamage, m_MaxDamage);
+    }
 }
