@@ -38,7 +38,7 @@ public class MoveBehaviour : GenericBehaviour
 			jump = true;
         if (Input.GetButtonDown("Fire1"))
         {
-            attack1 = true;
+            anim.SetTrigger("Attack");
         }
 	}
 
@@ -50,7 +50,6 @@ public class MoveBehaviour : GenericBehaviour
 
 		// Call the jump manager.
 		JumpManagement();
-        AttackManagement();
 
     }
 
@@ -76,35 +75,6 @@ public class MoveBehaviour : GenericBehaviour
 			}
 		}
 	}
-
-    void AttackManagement()
-    {
-
-        if (attack1)
-        {
-            // Set jump boolean on the Animator controller.
-            anim.SetBool(attack1Bool, true);
-            attack1 = false;
-        }
-        else if (anim.GetBool(attack1Bool) && !IsAttacking())
-        {
-            anim.SetBool(attack1Bool, false);
-        }
-
-    }
-
-    bool IsAttacking()
-    {
-        if (anim.IsInTransition(0))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
 
     // Deal with the basic player movement
     void MovementManagement(float horizontal, float vertical, bool running)

@@ -6,7 +6,7 @@ public class BatController : MonoBehaviour {
 
     public float m_MinDamage;
     public float m_MaxDamage;
-
+    public GameObject m_Player;
     // Use this for initialization
     void Start () {
 		
