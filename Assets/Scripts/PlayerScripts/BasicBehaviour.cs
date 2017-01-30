@@ -176,7 +176,7 @@ public class BasicBehaviour : MonoBehaviour
 public abstract class GenericBehaviour : MonoBehaviour
 {
 	protected Rigidbody rbody;                     // Reference to the player's rigidbody.
-	protected Animator anim;                       // Reference to the Animator component.
+	protected Animator m_Anim;                       // Reference to the Animator component.
 	protected int speedFloat;                      // Speed parameter on the Animator.
 	protected BasicBehaviour behaviourManager;     // Reference to the basic behaviour manager.
 	protected ThirdPersonOrbitCam camScript;       // Reference to the third person camera script.
@@ -187,7 +187,7 @@ public abstract class GenericBehaviour : MonoBehaviour
 	void Awake()
 	{
 		// Set up the references.
-		anim = GetComponent<Animator> ();
+		m_Anim = GetComponent<Animator> ();
 		rbody = GetComponent<Rigidbody> ();
 		behaviourManager = GetComponent<BasicBehaviour> ();
 		camScript = behaviourManager.playerCamera.GetComponent<ThirdPersonOrbitCam> ();

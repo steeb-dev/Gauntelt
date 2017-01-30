@@ -35,7 +35,7 @@ public class PlayerBehaviour : GenericBehaviour
         jumpBool = Animator.StringToHash("Jump");
 		groundedBool = Animator.StringToHash("Grounded");
         attack1Bool = Animator.StringToHash("Attack1");
-        anim.SetBool (groundedBool, true);
+        m_Anim.SetBool (groundedBool, true);
 
 		// Subscribe and register this behaviour as the default behaviour.
 		behaviourManager.SubscribeBehaviour (this);
@@ -51,7 +51,7 @@ public class PlayerBehaviour : GenericBehaviour
                 jump = true;
             if (Input.GetButtonDown("Fire1"))
             {
-                anim.SetTrigger("Attack");
+                m_Anim.SetTrigger("Attack");
                 m_Bat.Attack();
             }
         }
@@ -75,17 +75,17 @@ public class PlayerBehaviour : GenericBehaviour
 	void JumpManagement()
 	{
 		// Already jumped, landing.
-		if (anim.GetBool(jumpBool) && rbody.velocity.y < 0)
+		if (m_Anim.GetBool(jumpBool) && rbody.velocity.y < 0)
 		{
 			// Set jump boolean on the Animator controller.
 			jump = false;
-			anim.SetBool (jumpBool, false);
+			m_Anim.SetBool (jumpBool, false);
 		}
 		// Start jump.
-		if (jump && !anim.GetBool(jumpBool) && IsGrounded())
+		if (jump && !m_Anim.GetBool(jumpBool) && IsGrounded())
 		{
 			// Set jump boolean on the Animator controller.
-			anim.SetBool(jumpBool, true);
+			m_Anim.SetBool(jumpBool, true);
 			if(speed > 0)
 			{
 				// Set jump vertical impulse when moving.
@@ -98,7 +98,7 @@ public class PlayerBehaviour : GenericBehaviour
     void MovementManagement(float horizontal, float vertical, bool running)
 	{
 		// On ground, obey gravity.
-		if (anim.GetBool(groundedBool))
+		if (m_Anim.GetBool(groundedBool))
 			rbody.useGravity = true;
 
 		// Call function that deals with player orientation.
@@ -124,7 +124,7 @@ public class PlayerBehaviour : GenericBehaviour
 		{
 			speed = 0f;
 		}
-		anim.SetFloat(speedFloat, speed, speedDampTime, Time.deltaTime);
+		m_Anim.SetFloat(speedFloat, speed, speedDampTime, Time.deltaTime);
 	}
 
 	// Rotate the player to match correct orientation, according to camera and key pressed.
@@ -174,38 +174,7 @@ public class PlayerBehaviour : GenericBehaviour
                 {
                     this.m_HP -= damage;
                     StartCoroutine(Hit());
-                    var relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
-
-
-                    string[] hitArray = new string[] { "HitLeft", "HitRight", "HitFront", "HitBack" };
-                    float xWeight, yWeight;
-                    xWeight = Mathf.Abs(relativePoint.x);
-                    yWeight = Mathf.Abs(relativePoint.y);
-                    int animIndex = 0;
-                    if (xWeight > yWeight)
-                    {
-                        if (relativePoint.x < 0)
-                        {
-                            animIndex = 0;
-                        }
-                        else
-                        {
-                            animIndex = 1;
-                        }
-                    }
-                    else
-                    {
-                        if (relativePoint.z > 0)
-                        {
-                            animIndex = 2;
-                        }
-                        else
-                        {
-                            animIndex = 3;
-                        }
-                    }
-
-                    anim.SetTrigger(hitArray[animIndex]);
+                    HandleReactionAnimation(bc);
 
                     //m_PSys.Emit(100);
 
@@ -217,6 +186,30 @@ public class PlayerBehaviour : GenericBehaviour
                 }
             }
         }
+    }
+
+
+    void HandleReactionAnimation(BatController bc)
+    {
+        var relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
+
+        string[] hitArray = new string[] { "HitLeft", "HitRight", "HitFront", "HitBack" };
+        float xWeight, yWeight;
+        xWeight = Mathf.Abs(relativePoint.x);
+        yWeight = Mathf.Abs(relativePoint.y);
+        int animIndex = 0;
+        if (xWeight > yWeight)
+        {
+            if (relativePoint.x < 0) { animIndex = 0; }
+            else { animIndex = 1; }
+        }
+        else
+        {
+            if (relativePoint.z > 0) { animIndex = 2; }
+            else { animIndex = 3; }
+        }
+
+        m_Anim.SetTrigger(hitArray[animIndex]);
     }
 
     IEnumerator KillAfterDeath()

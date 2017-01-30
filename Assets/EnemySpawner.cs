@@ -30,6 +30,7 @@ public class EnemySpawner : MonoBehaviour {
             m_PSys.Emit(500);
             GameObject go = Instantiate(m_Enemy);
             go.transform.position = this.transform.position - new Vector3(0,0,1f);
+            go.transform.parent = this.transform.parent;
         }
     }
 

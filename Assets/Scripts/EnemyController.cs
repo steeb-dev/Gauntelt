@@ -87,38 +87,7 @@ public class EnemyController : MonoBehaviour
             {
                 this.m_HP -= damage;
                 StartCoroutine(Hit());
-                var relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
-
-
-                string[] hitArray = new string[] { "HitLeft", "HitRight", "HitFront", "HitBack" };
-                float xWeight, yWeight;
-                xWeight = Mathf.Abs(relativePoint.x);
-                yWeight = Mathf.Abs(relativePoint.y);
-                int animIndex = 0;
-                if (xWeight > yWeight)
-                {
-                    if (relativePoint.x < 0)
-                    {
-                        animIndex = 0;
-                    }
-                    else
-                    {
-                        animIndex = 1;
-                    }
-                }
-                else
-                {
-                    if (relativePoint.z > 0)
-                    {
-                        animIndex = 2;
-                    }
-                    else
-                    {
-                        animIndex = 3;
-                    }
-                }
-
-                m_Anim.SetTrigger(hitArray[animIndex]);
+                HandleReactionAnimation(bc);
 
                 m_PSys.Emit(100);
 
@@ -129,6 +98,29 @@ public class EnemyController : MonoBehaviour
                 }
             }
         }
+    }
+
+    void HandleReactionAnimation(BatController bc)
+    {
+        var relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
+        
+        string[] hitArray = new string[] { "HitLeft", "HitRight", "HitFront", "HitBack" };
+        float xWeight, yWeight;
+        xWeight = Mathf.Abs(relativePoint.x);
+        yWeight = Mathf.Abs(relativePoint.y);
+        int animIndex = 0;
+        if (xWeight > yWeight)
+        {
+            if (relativePoint.x < 0){animIndex = 0;}
+            else{animIndex = 1;}
+        }
+        else
+        {
+            if (relativePoint.z > 0){animIndex = 2;}
+            else{animIndex = 3;}
+        }
+
+        m_Anim.SetTrigger(hitArray[animIndex]);
     }
 
 
