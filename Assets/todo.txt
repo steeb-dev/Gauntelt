@@ -1,10 +1,10 @@
 gauntlet todo
 
--healing items
+-tweak animation speeds and cooldowns etc.
+-add weapon & projectile spark psys
 -add multiplay support
 -enemy - projectile thrower
 -enemy - heavy guy
--tweak animation speeds and cooldowns etc.
 
 -camera stuff
 -ui stuff - menu
