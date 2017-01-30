@@ -2,7 +2,7 @@
 using System.Collections;
 
 // MoveBehaviour inherits from GenericBehaviour. This class corresponds to basic walk and run behaviour, it is the default behaviour.
-public class MoveBehaviour : GenericBehaviour
+public class PlayerBehaviour : GenericBehaviour
 {
 	public float walkSpeed = 0.15f;                 // Default walk speed.
 	public float runSpeed = 1.0f;                   // Default run speed.
@@ -17,12 +17,28 @@ public class MoveBehaviour : GenericBehaviour
  	private bool jump;                              // Boolean to determine whether or not the player started a jump.
     private bool attack1 = false;
     public BatController m_Bat;
+    public int m_HP;
+    private bool m_Dead;
+    public SkinnedMeshRenderer m_MeshRenderer;
+    private ParticleSystem m_PSys;
+    public Color m_DefaultColor;
+    public Color m_HitColor;
+    public float m_HitFlashTime;
 
+    public GameObject m_RagDoll;
+    public UnityEngine.UI.Text m_HealthText;
+
+    public Camera m_DeathCam;
+    public Camera m_MainCam;
     // Start is always called after any Awake functions.
-    void Start() 
-	{
-		// Set up the references.
-		jumpBool = Animator.StringToHash("Jump");
+    void Start()
+    {
+        m_DeathCam.enabled = false;
+        m_MainCam.enabled = true;
+        m_PSys = GetComponent<ParticleSystem>();
+        m_MeshRenderer.materials[0].color = m_DefaultColor;
+        // Set up the references.
+        jumpBool = Animator.StringToHash("Jump");
 		groundedBool = Animator.StringToHash("Grounded");
         attack1Bool = Animator.StringToHash("Attack1");
         anim.SetBool (groundedBool, true);
@@ -35,25 +51,31 @@ public class MoveBehaviour : GenericBehaviour
 	// Update is used to set features regardless the active behaviour.
 	void Update ()
 	{
-		if(Input.GetButtonDown ("Jump"))
-			jump = true;
-        if (Input.GetButtonDown("Fire1"))
+        m_HealthText.text = "HP: " + m_HP.ToString();
+        if (!m_Dead)
         {
-            anim.SetTrigger("Attack");
-            m_Bat.Attack();
+            if (Input.GetButtonDown("Jump"))
+                jump = true;
+            if (Input.GetButtonDown("Fire1"))
+            {
+                anim.SetTrigger("Attack");
+                m_Bat.Attack();
+            }
         }
 	}
     
 
 	// LocalFixedUpdate overrides the virtual function of the base class.
 	public override void LocalFixedUpdate()
-	{
-		// Call the basic movement manager.
-		MovementManagement (behaviourManager.GetH, behaviourManager.GetV, true);
+    {
+        if (!m_Dead)
+        {
+            // Call the basic movement manager.
+            MovementManagement(behaviourManager.GetH, behaviourManager.GetV, true);
 
-		// Call the jump manager.
-		JumpManagement();
-
+            // Call the jump manager.
+            JumpManagement();
+        }
     }
 
 	// Execute the idle and walk/run jump movements.
@@ -146,4 +168,92 @@ public class MoveBehaviour : GenericBehaviour
 
 		return targetDirection;
 	}
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Weapon")
+        {
+            if (!m_Dead)
+            {
+                BatController bc = other.gameObject.GetComponent<BatController>();
+                int damage = (int)bc.GetDamage();
+                if (damage > 0)
+                {
+                    this.m_HP -= damage;
+                    StartCoroutine(Hit());
+                    var relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
+
+
+                    string[] hitArray = new string[] { "HitLeft", "HitRight", "HitFront", "HitBack" };
+                    float xWeight, yWeight;
+                    xWeight = Mathf.Abs(relativePoint.x);
+                    yWeight = Mathf.Abs(relativePoint.y);
+                    int animIndex = 0;
+                    if (xWeight > yWeight)
+                    {
+                        if (relativePoint.x < 0)
+                        {
+                            animIndex = 0;
+                        }
+                        else
+                        {
+                            animIndex = 1;
+                        }
+                    }
+                    else
+                    {
+                        if (relativePoint.z > 0)
+                        {
+                            animIndex = 2;
+                        }
+                        else
+                        {
+                            animIndex = 3;
+                        }
+                    }
+
+                    anim.SetTrigger(hitArray[animIndex]);
+
+                    //m_PSys.Emit(100);
+
+                    if (m_HP <= 0)
+                    {
+                        StopAllCoroutines();
+                        StartCoroutine(KillAfterDeath());
+                    }
+                }
+            }
+        }
+    }
+
+    IEnumerator KillAfterDeath()
+    {
+        m_Dead = true;
+        m_Bat.DeactivateCollider();
+        yield return new WaitForSeconds(0.2f);
+        GameObject ragdoll = Instantiate(m_RagDoll);
+
+        ragdoll.GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = m_DefaultColor;
+        ragdoll.transform.position = this.transform.position;
+        ragdoll.transform.rotation = this.transform.rotation;
+        yield return new WaitForSeconds(5.0f);
+        m_DeathCam.enabled = true;
+        m_MainCam.gameObject.GetComponent<ThirdPersonOrbitCam>().enabled = false;
+        m_MainCam.enabled = false;
+        Destroy(this.gameObject);
+    }
+
+
+    IEnumerator Hit()
+    {
+        float t = 0;
+        m_MeshRenderer.materials[0].color = m_HitColor;
+        while (t < m_HitFlashTime)
+        {
+            m_MeshRenderer.materials[0].color = Color.Lerp(m_HitColor, m_DefaultColor, t / m_HitFlashTime);
+            t += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+    }
+
 }

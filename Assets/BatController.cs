@@ -9,7 +9,8 @@ public class BatController : MonoBehaviour {
     public GameObject m_Player;
     private BoxCollider m_Collider;
     public float m_WarmUp = 0.2f;
-    public float m_CoolDown = 0.4f;
+    public float m_CoolDown = 0.5f;
+    bool m_Attacking = false;
 
     // Use this for initialization
     void Start () {
@@ -19,23 +20,28 @@ public class BatController : MonoBehaviour {
 
     public void Attack()
     {
-        //StopAllCoroutines();
-        StartCoroutine(AttackCo());
+        if (!m_Attacking)
+            StartCoroutine(AttackCo());
     }
 
     IEnumerator AttackCo()
     {
+        m_Attacking = true;
         yield return new WaitForSeconds(m_WarmUp);
         ActivateCollider();
         yield return new WaitForSeconds(m_CoolDown);
         DeactivateCollider();
+        m_Attacking = false;
     }
 
-    void ActivateCollider()
+   public void ActivateCollider()
     { m_Collider.enabled = true; }
 
-    void DeactivateCollider()
-    { m_Collider.enabled = false; }
+    public void DeactivateCollider()
+    {
+        StopAllCoroutines();
+        m_Collider.enabled = false; 
+    }
 
     public float GetDamage()
     {

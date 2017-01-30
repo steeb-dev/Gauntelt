@@ -23,9 +23,11 @@ public class EnemyController : MonoBehaviour
     public float speedDampTime = 0.1f;
     public float m_AttackRange = 1f;
     public bool m_Attacking;
+    public BatController m_Bat;
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
         m_PSys = GetComponent<ParticleSystem>();
         m_Anim = GetComponent<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
@@ -47,23 +49,28 @@ public class EnemyController : MonoBehaviour
 
     void FixedUpdate()
     {
-        float distance = Vector3.Distance(this.transform.position, m_TargetPlayer.transform.position);
-        if (distance > m_AttackRange)
+        if (m_TargetPlayer != null)
         {
-            m_RigidBody.AddForce(m_PlayerDirection * m_RunSpeed);
-            m_Anim.SetFloat(speedFloat, m_RunSpeed, speedDampTime, Time.deltaTime);
-        }
-        else
-        {
-            if (!m_Attacking)
+            float distance = Vector3.Distance(this.transform.position, m_TargetPlayer.transform.position);
+            if (distance > m_AttackRange)
             {
-                m_RigidBody.AddForce(-m_PlayerDirection * m_RunSpeed);
-                m_Anim.SetFloat(speedFloat, 0, 0.05f, Time.deltaTime);
-                m_Attacking = true;
+                m_Bat.DeactivateCollider();
+                m_RigidBody.AddForce(m_PlayerDirection * m_RunSpeed);
+                m_Anim.SetFloat(speedFloat, m_RunSpeed, speedDampTime, Time.deltaTime);
             }
             else
             {
-                m_Anim.SetTrigger("Attack");                
+                if (!m_Attacking)
+                {
+                    m_RigidBody.AddForce(-m_PlayerDirection * m_RunSpeed);
+                    m_Anim.SetFloat(speedFloat, 0, 0.05f, Time.deltaTime);
+                    m_Attacking = true;
+                }
+                else
+                {
+                    m_Bat.ActivateCollider();
+                    m_Anim.SetTrigger("Attack");
+                }
             }
         }
     }
@@ -130,6 +137,7 @@ public class EnemyController : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
 
         GameObject ragdoll = Instantiate(m_RagDoll);
+        ragdoll.GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = m_DefaultColor;
         ragdoll.transform.position = this.transform.position;
         ragdoll.transform.rotation= this.transform.rotation;
         Destroy(this.gameObject);

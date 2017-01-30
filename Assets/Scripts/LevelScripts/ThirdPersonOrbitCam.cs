@@ -48,38 +48,40 @@ public class ThirdPersonOrbitCam : MonoBehaviour
 		ResetMaxVerticalAngle();
 	}
 
-	void LateUpdate()
-	{
+    void LateUpdate()
+    {
+        if (player != null)
+        {
+            // Set vertical movement limit.
+            angleV = Mathf.Clamp(angleV, minVerticalAngle, targetMaxVerticalAngle);
 
-		// Set vertical movement limit.
-		angleV = Mathf.Clamp(angleV, minVerticalAngle, targetMaxVerticalAngle);
+            // Set camera orientation..
+            Quaternion camYRotation = Quaternion.Euler(0, angleH, 0);
+            Quaternion aimRotation = Quaternion.Euler(-angleV, angleH, 0);
+            cam.rotation = aimRotation;
 
-		// Set camera orientation..
-		Quaternion camYRotation = Quaternion.Euler(0, angleH, 0);
-		Quaternion aimRotation = Quaternion.Euler(-angleV, angleH, 0);
-		cam.rotation = aimRotation;
+            // Set FOV.
+            cam.GetComponent<Camera>().fieldOfView = Mathf.Lerp(cam.GetComponent<Camera>().fieldOfView, targetFOV, Time.deltaTime);
 
-		// Set FOV.
-		cam.GetComponent<Camera>().fieldOfView = Mathf.Lerp (cam.GetComponent<Camera>().fieldOfView, targetFOV,  Time.deltaTime);
+            // Test for collision with the environment based on current camera position.
+            Vector3 baseTempPosition = player.position + camYRotation * targetPivotOffset;
+            Vector3 noCollisionOffset = targetCamOffset;
+            for (float zOffset = targetCamOffset.z; zOffset <= 0; zOffset += 0.5f)
+            {
+                noCollisionOffset.z = zOffset;
+                if (DoubleViewingPosCheck(baseTempPosition + aimRotation * noCollisionOffset) || zOffset == 0)
+                {
+                    break;
+                }
+            }
 
-		// Test for collision with the environment based on current camera position.
-		Vector3 baseTempPosition = player.position + camYRotation * targetPivotOffset;
-		Vector3 noCollisionOffset = targetCamOffset;
-		for(float zOffset = targetCamOffset.z; zOffset <= 0; zOffset += 0.5f)
-		{
-			noCollisionOffset.z = zOffset;
-			if (DoubleViewingPosCheck (baseTempPosition + aimRotation * noCollisionOffset) || zOffset == 0) 
-			{
-				break;
-			} 
-		}
+            // Repostition the camera.
+            smoothPivotOffset = Vector3.Lerp(smoothPivotOffset, targetPivotOffset, smooth * Time.deltaTime);
+            smoothCamOffset = Vector3.Lerp(smoothCamOffset, noCollisionOffset, smooth * Time.deltaTime);
 
-		// Repostition the camera.
-		smoothPivotOffset = Vector3.Lerp(smoothPivotOffset, targetPivotOffset, smooth * Time.deltaTime);
-		smoothCamOffset = Vector3.Lerp(smoothCamOffset, noCollisionOffset, smooth * Time.deltaTime);
-
-		cam.position =  player.position + camYRotation * smoothPivotOffset + aimRotation * smoothCamOffset;
-	}
+            cam.position = player.position + camYRotation * smoothPivotOffset + aimRotation * smoothCamOffset;
+        }
+    }
 
 	// Set camera offsets to custom values.
 	public void SetTargetOffsets(Vector3 newPivotOffset, Vector3 newCamOffset)
