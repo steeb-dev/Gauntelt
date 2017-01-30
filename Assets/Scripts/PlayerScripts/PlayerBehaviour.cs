@@ -18,7 +18,7 @@ public class PlayerBehaviour : GenericBehaviour
     private bool attack1 = false;
     public BatController m_Bat;
     public int m_HP;
-    private bool m_Dead;
+    public bool m_Dead;
     public SkinnedMeshRenderer m_MeshRenderer;
     private ParticleSystem m_PSys;
     public Color m_DefaultColor;
@@ -26,15 +26,9 @@ public class PlayerBehaviour : GenericBehaviour
     public float m_HitFlashTime;
 
     public GameObject m_RagDoll;
-    public UnityEngine.UI.Text m_HealthText;
-
-    public Camera m_DeathCam;
-    public Camera m_MainCam;
     // Start is always called after any Awake functions.
     void Start()
     {
-        m_DeathCam.enabled = false;
-        m_MainCam.enabled = true;
         m_PSys = GetComponent<ParticleSystem>();
         m_MeshRenderer.materials[0].color = m_DefaultColor;
         // Set up the references.
@@ -51,7 +45,6 @@ public class PlayerBehaviour : GenericBehaviour
 	// Update is used to set features regardless the active behaviour.
 	void Update ()
 	{
-        m_HealthText.text = "HP: " + m_HP.ToString();
         if (!m_Dead)
         {
             if (Input.GetButtonDown("Jump"))
@@ -236,10 +229,6 @@ public class PlayerBehaviour : GenericBehaviour
         ragdoll.GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = m_DefaultColor;
         ragdoll.transform.position = this.transform.position;
         ragdoll.transform.rotation = this.transform.rotation;
-        yield return new WaitForSeconds(5.0f);
-        m_DeathCam.enabled = true;
-        m_MainCam.gameObject.GetComponent<ThirdPersonOrbitCam>().enabled = false;
-        m_MainCam.enabled = false;
         Destroy(this.gameObject);
     }
 
