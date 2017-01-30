@@ -11,7 +11,7 @@ public class EnemyController : MonoBehaviour
     public float m_HitFlashTime = 0.2f;
 
     public SkinnedMeshRenderer m_MeshRenderer;
-    private ParticleSystem m_PSys;
+    public ParticleSystem m_PSys;
     private Animator m_Anim;
     private Rigidbody m_RigidBody;
     public GameObject m_RagDoll;
@@ -29,7 +29,6 @@ public class EnemyController : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-        m_PSys = GetComponent<ParticleSystem>();
         m_Anim = GetComponent<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
         m_TargetPlayer = GameObject.FindWithTag("Player");
@@ -81,13 +80,14 @@ public class EnemyController : MonoBehaviour
         if (!m_Dead)
         {
             Vector3 relativePoint = new Vector3(0, 0, 0);
-
+            Vector3 inverseDir = new Vector3(0, 0, 0);
             int damage = 0;
             if (other.gameObject.tag == "Weapon")
             {
                 BatController bc = other.gameObject.GetComponent<BatController>();
                 damage = (int)bc.GetDamage();
-                relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
+                relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);     
+                inverseDir = new Vector3(-relativePoint.x, relativePoint.y, -relativePoint.z);
             }
             else if (other.gameObject.tag == "Projectile")
             {
@@ -101,7 +101,8 @@ public class EnemyController : MonoBehaviour
                 this.m_HP -= damage;
                 StartCoroutine(Hit());
                 HandleReactionAnimation(relativePoint);
-
+                inverseDir = relativePoint;
+                m_PSys.transform.rotation = Quaternion.Slerp(m_PSys.transform.rotation, Quaternion.LookRotation(relativePoint), 1f);
                 m_PSys.Emit(100);
 
                 if (m_HP <= 0)
