@@ -4,17 +4,17 @@ using System.Collections;
 // MoveBehaviour inherits from GenericBehaviour. This class corresponds to basic walk and run behaviour, it is the default behaviour.
 public class PlayerBehaviour : GenericBehaviour
 {
-	public float walkSpeed = 0.15f;                 // Default walk speed.
-	public float runSpeed = 1.0f;                   // Default run speed.
-	public float sprintSpeed = 2.0f;                // Default sprint speed.
-	public float speedDampTime = 0.1f;              // Default damp time to change the animations based on current speed.
-	public float jumpHeight = 1.0f;                 // Default jump height.
+    public float walkSpeed = 0.15f;                 // Default walk speed.
+    public float runSpeed = 1.0f;                   // Default run speed.
+    public float sprintSpeed = 2.0f;                // Default sprint speed.
+    public float speedDampTime = 0.1f;              // Default damp time to change the animations based on current speed.
+    public float jumpHeight = 1.0f;                 // Default jump height.
 
-	private float speed;                            // Moving speed.
-	private int jumpBool;                           // Animator variable related to jumping.
-	private int groundedBool;                       // Animator variable related to whether or not the player is on ground.
+    private float speed;                            // Moving speed.
+    private int jumpBool;                           // Animator variable related to jumping.
+    private int groundedBool;                       // Animator variable related to whether or not the player is on ground.
     private int attack1Bool;                       // Animator variable related to whether or not the player is on ground.
- 	private bool jump;                              // Boolean to determine whether or not the player started a jump.
+    private bool jump;                              // Boolean to determine whether or not the player started a jump.
     private bool attack1 = false;
     public BatController m_Bat;
     public int m_HP;
@@ -24,6 +24,8 @@ public class PlayerBehaviour : GenericBehaviour
     public Color m_DefaultColor;
     public Color m_HitColor;
     public float m_HitFlashTime;
+    public float m_HitCooldown = 0.2f;
+    private float m_CooldownTimer = 0f;
 
     public GameObject m_RagDoll;
     // Start is always called after any Awake functions.
@@ -33,18 +35,19 @@ public class PlayerBehaviour : GenericBehaviour
         m_MeshRenderer.materials[0].color = m_DefaultColor;
         // Set up the references.
         jumpBool = Animator.StringToHash("Jump");
-		groundedBool = Animator.StringToHash("Grounded");
+        groundedBool = Animator.StringToHash("Grounded");
         attack1Bool = Animator.StringToHash("Attack1");
-        m_Anim.SetBool (groundedBool, true);
+        m_Anim.SetBool(groundedBool, true);
 
-		// Subscribe and register this behaviour as the default behaviour.
-		behaviourManager.SubscribeBehaviour (this);
-		behaviourManager.RegisterDefaultBehaviour (this.behaviourCode);
-	}
+        // Subscribe and register this behaviour as the default behaviour.
+        behaviourManager.SubscribeBehaviour(this);
+        behaviourManager.RegisterDefaultBehaviour(this.behaviourCode);
+    }
 
-	// Update is used to set features regardless the active behaviour.
-	void Update ()
-	{
+    // Update is used to set features regardless the active behaviour.
+    void Update()
+    {
+        m_CooldownTimer += Time.deltaTime;
         if (!m_Dead)
         {
             if (Input.GetButtonDown("Jump"))
@@ -54,12 +57,20 @@ public class PlayerBehaviour : GenericBehaviour
                 m_Anim.SetTrigger("Attack");
                 m_Bat.Attack();
             }
+            else if (Input.GetButtonDown("Fire2"))
+            {
+                m_Bat.DeactivateCollider();
+                m_Anim.SetTrigger("Projectile");
+                FireProjectile();
+            }
         }
-	}
-    
+    }
 
-	// LocalFixedUpdate overrides the virtual function of the base class.
-	public override void LocalFixedUpdate()
+    void FireProjectile()
+    { }
+
+    // LocalFixedUpdate overrides the virtual function of the base class.
+    public override void LocalFixedUpdate()
     {
         if (!m_Dead)
         {
@@ -174,7 +185,11 @@ public class PlayerBehaviour : GenericBehaviour
                 {
                     this.m_HP -= damage;
                     StartCoroutine(Hit());
-                    HandleReactionAnimation(bc);
+                    if (m_CooldownTimer > m_HitCooldown)
+                    {
+                        m_CooldownTimer = 0f;
+                        HandleReactionAnimation(bc);
+                    }
 
                     //m_PSys.Emit(100);
 
