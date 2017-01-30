@@ -26,7 +26,8 @@ public class PlayerBehaviour : GenericBehaviour
     public float m_HitFlashTime;
     public float m_HitCooldown = 0.2f;
     private float m_CooldownTimer = 0f;
-
+    public GameObject m_ProjectilePrefab;
+    private bool m_Firing = false;  
     public GameObject m_RagDoll;
     // Start is always called after any Awake functions.
     void Start()
@@ -57,17 +58,35 @@ public class PlayerBehaviour : GenericBehaviour
                 m_Anim.SetTrigger("Attack");
                 m_Bat.Attack();
             }
-            else if (Input.GetButtonDown("Fire2"))
+            else if (Input.GetButtonDown("Fire2") && !m_Firing)
             {
+                m_Firing = true;
                 m_Bat.DeactivateCollider();
                 m_Anim.SetTrigger("Projectile");
-                FireProjectile();
+                StartCoroutine(FireProjectile());
             }
         }
     }
 
-    void FireProjectile()
-    { }
+    IEnumerator FireProjectile()
+    {
+        WaitForEndOfFrame waitForFrame = new WaitForEndOfFrame();
+        bool loop = true;
+        while(loop)
+        {
+            if(m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile"))
+            {
+                loop = false;
+            }
+            yield return waitForFrame;
+        }
+        Vector3 trajectory = transform.forward;
+        GameObject pObj = Instantiate(m_ProjectilePrefab);
+        pObj.transform.position = this.transform.position;
+        Projectile p = pObj.GetComponent<Projectile>();
+        p.Init(trajectory);
+        m_Firing = false;
+    }
 
     // LocalFixedUpdate overrides the virtual function of the base class.
     public override void LocalFixedUpdate()
@@ -187,6 +206,7 @@ public class PlayerBehaviour : GenericBehaviour
                     StartCoroutine(Hit());
                     if (m_CooldownTimer > m_HitCooldown)
                     {
+                        m_HitCooldown = Random.Range(0.4f, 2f);
                         m_CooldownTimer = 0f;
                         HandleReactionAnimation(bc);
                     }

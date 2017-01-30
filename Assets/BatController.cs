@@ -45,6 +45,6 @@ public class BatController : MonoBehaviour {
 
     public float GetDamage()
     {
-        return Random.Range(m_MaxDamage, m_MaxDamage);
+        return Random.Range(m_MinDamage, m_MaxDamage);
     }
 }

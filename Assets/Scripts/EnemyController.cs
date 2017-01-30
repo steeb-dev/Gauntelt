@@ -24,6 +24,7 @@ public class EnemyController : MonoBehaviour
     public float m_AttackRange = 1f;
     public bool m_Attacking;
     public BatController m_Bat;
+    public bool m_Dead;
 
     // Use this for initialization
     void Start ()
@@ -77,33 +78,43 @@ public class EnemyController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Weapon")
+        if (!m_Dead)
         {
+            Vector3 relativePoint = new Vector3(0, 0, 0);
 
-
-            BatController bc = other.gameObject.GetComponent<BatController>();
-            int damage = (int)bc.GetDamage();
+            int damage = 0;
+            if (other.gameObject.tag == "Weapon")
+            {
+                BatController bc = other.gameObject.GetComponent<BatController>();
+                damage = (int)bc.GetDamage();
+                relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
+            }
+            else if (other.gameObject.tag == "Projectile")
+            {
+                Projectile p = other.gameObject.GetComponent<Projectile>();
+                damage = (int)p.GetDamage();
+                relativePoint = transform.InverseTransformPoint(other.gameObject.transform.position);
+                Destroy(other.gameObject);
+            }
             if (damage > 0)
             {
                 this.m_HP -= damage;
                 StartCoroutine(Hit());
-                HandleReactionAnimation(bc);
+                HandleReactionAnimation(relativePoint);
 
                 m_PSys.Emit(100);
 
                 if (m_HP <= 0)
                 {
-                    //m_Anim.SetBool("Dead", true);
+                    m_Dead = true;
                     StartCoroutine(KillAfterDeath());
                 }
             }
         }
     }
 
-    void HandleReactionAnimation(BatController bc)
-    {
-        var relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);
-        
+    void HandleReactionAnimation(Vector3 relativePoint)
+    {        
         string[] hitArray = new string[] { "HitLeft", "HitRight", "HitFront", "HitBack" };
         float xWeight, yWeight;
         xWeight = Mathf.Abs(relativePoint.x);

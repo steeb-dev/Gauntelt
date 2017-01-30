@@ -13,6 +13,7 @@ public class EnemySpawner : MonoBehaviour {
     public Color m_DefaultColor;
     public Color m_HitColor;
     public float m_HitFlashTime = 0.2f;
+    public bool m_Dead = false;
 
     // Use this for initialization
     void Start () {
@@ -36,20 +37,33 @@ public class EnemySpawner : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Weapon")
-        {
-            StartCoroutine(Hit());
-            m_PSys.Emit(20);
-            BatController bc = other.gameObject.GetComponent<BatController>();
-            this.m_HP -= (int)bc.GetDamage();
-         
-            m_PSys.Emit(100);
-
-            if (m_HP <= 0)
+        if (!m_Dead)
+        {         
+            int damage = 0;
+            if (other.gameObject.tag == "Weapon")
             {
-                StopAllCoroutines();
-                //m_Anim.SetBool("Dead", true);
-                StartCoroutine(KillAfterDeath());
+                BatController bc = other.gameObject.GetComponent<BatController>();
+                damage = (int)bc.GetDamage();
+            }
+            else if (other.gameObject.tag == "Projectile")
+            {
+                Projectile p = other.gameObject.GetComponent<Projectile>();
+                damage = (int)p.GetDamage();
+                Destroy(other.gameObject);
+            }
+            if (damage > 0)
+            {
+                this.m_HP -= damage;
+                StartCoroutine(Hit());
+     
+                m_PSys.Emit(100);
+
+                if (m_HP <= 0)
+                {
+                    m_Dead = true;
+                    StopAllCoroutines();
+                    StartCoroutine(KillAfterDeath());
+                }
             }
         }
     }
