@@ -1,0 +1,8 @@
+gauntlet todo
+
+-add multiplay support
+-projectiles - player & enemy
+-healing items
+
+-camera stuff
+-ui stuff - menu
