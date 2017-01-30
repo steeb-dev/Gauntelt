@@ -1,8 +1,13 @@
 gauntlet todo
 
--add multiplay support
--projectiles - player & enemy
 -healing items
+-add multiplay support
+-enemy - projectile thrower
+-enemy - heavy guy
+-tweak animation speeds and cooldowns etc.
 
 -camera stuff
 -ui stuff - menu
+-textures 
+-shaders and effects
+-add shaderforge
