@@ -26,10 +26,12 @@ public class EnemyController : MonoBehaviour
     public BatController m_Bat;
     public bool m_Dead;
     private int movingBool;
+    Rigidbody[] rigidBodies;
 
     // Use this for initialization
     void Start ()
     {
+        rigidBodies = GetComponentsInChildren<Rigidbody>();
         movingBool = Animator.StringToHash("Moving");
         m_Anim = GetComponent<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
@@ -41,12 +43,20 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Vector3 explosionPos = new Vector3(this.transform.position.x, this.transform.position.y - 2, this.transform.position.z);
+            foreach (Rigidbody rb in rigidBodies)
+            {
+                rb.AddExplosionForce(100000, explosionPos, 100);
+            }
+        }
         if (m_TargetPlayer != null)
         {
             m_PlayerDirection = m_TargetPlayer.transform.position - m_RigidBody.position;
             m_PlayerDirection.Normalize();
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(m_PlayerDirection), m_TurnSpeed * Time.deltaTime);           
-        }
+        }  
     }
 
     void FixedUpdate()
