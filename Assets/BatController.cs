@@ -23,6 +23,7 @@ public class BatController : MonoBehaviour {
     public void Attack()
     {
         if (!m_Attacking)
+            StopAllCoroutines();
             StartCoroutine(AttackCo());
     }
 
