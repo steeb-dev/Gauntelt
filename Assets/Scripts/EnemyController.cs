@@ -7,7 +7,6 @@ public class EnemyController : MonoBehaviour
 
     public float m_HP;
     public Color m_DefaultColor;
-    public Color m_HitColor;
     public float m_HitFlashTime = 0.2f;
 
     public SkinnedMeshRenderer m_MeshRenderer;
@@ -87,8 +86,11 @@ public class EnemyController : MonoBehaviour
                 }
                 else
                 {
-                    m_Bat.ActivateCollider();
-                    m_Anim.SetTrigger("Attack");
+                    if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && !m_Anim.IsInTransition(0))
+                    {
+                        m_Anim.SetTrigger("Attack");
+                        m_Bat.Attack();
+                    }
                 }
             }
         }
@@ -182,12 +184,13 @@ public class EnemyController : MonoBehaviour
     IEnumerator Hit()
     {
         float t = 0;
-        m_MeshRenderer.materials[0].color = m_HitColor;
         while (t < m_HitFlashTime)
         {
-            m_MeshRenderer.materials[0].color = Color.Lerp(m_HitColor, m_DefaultColor, t / m_HitFlashTime);
+            m_MeshRenderer.materials[0].color = Random.ColorHSV();
             t += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
+
+        m_MeshRenderer.materials[0].color = m_DefaultColor;
     }
 }

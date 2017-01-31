@@ -11,11 +11,13 @@ public class BatController : MonoBehaviour {
     public float m_WarmUp = 0.2f;
     public float m_CoolDown = 0.5f;
     bool m_Attacking = false;
-    public AudioSource m_Audio;
+    private AudioSource m_Audio;
     public AudioClip[] m_PunchClips;
+    public AudioClip m_SwooshClip;
 
     // Use this for initialization
     void Start () {
+        m_Audio = GetComponent<AudioSource>();
         m_Collider = GetComponent<BoxCollider>();
         m_Collider.enabled = false;
     }
@@ -29,6 +31,7 @@ public class BatController : MonoBehaviour {
 
     IEnumerator AttackCo()
     {
+        m_Audio.PlayOneShot(m_SwooshClip);
         m_Attacking = true;
         ActivateCollider();
         yield return new WaitForSeconds(m_CoolDown);

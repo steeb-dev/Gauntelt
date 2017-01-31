@@ -228,6 +228,8 @@ public class PlayerBehaviour : MonoBehaviour
                 int damage = (int)bc.GetDamage();
                 if (damage > 0)
                 {
+                    bc.PlaySound();
+
                     m_Source.Play();
                     this.m_HP -= damage;
                     StartCoroutine(Hit());

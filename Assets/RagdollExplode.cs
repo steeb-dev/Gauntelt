@@ -5,7 +5,6 @@ using UnityEngine;
 public class RagdollExplode : MonoBehaviour {
 
     Rigidbody[] rigidBodies;
-    public SkinnedMeshRenderer m_MeshRenderer;
 
 	// Use this for initialization
 	void Start () {
@@ -24,6 +23,5 @@ public class RagdollExplode : MonoBehaviour {
                 rb.AddExplosionForce(10000, explosionPos, 100);
             }
         }
-        m_MeshRenderer.materials[0].color = Random.ColorHSV();
     }
 }
