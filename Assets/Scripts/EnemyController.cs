@@ -27,10 +27,14 @@ public class EnemyController : MonoBehaviour
     public bool m_Dead;
     private int movingBool;
     Rigidbody[] rigidBodies;
-
+    public AudioClip m_RantClip;
+    public AudioClip m_HitClip;
+    AudioSource m_Source;
     // Use this for initialization
     void Start ()
     {
+        m_Source = GetComponent<AudioSource>();
+
         rigidBodies = GetComponentsInChildren<Rigidbody>();
         movingBool = Animator.StringToHash("Moving");
         m_Anim = GetComponent<Animator>();
@@ -101,6 +105,7 @@ public class EnemyController : MonoBehaviour
             {
                 BatController bc = other.gameObject.GetComponent<BatController>();
                 damage = (int)bc.GetDamage();
+                bc.PlaySound();
                 relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);     
                 inverseDir = new Vector3(-relativePoint.x, relativePoint.y, -relativePoint.z);
             }
@@ -110,14 +115,16 @@ public class EnemyController : MonoBehaviour
                 if (p != null)
                 {
                     damage = (int)p.GetDamage();
-                    relativePoint = transform.InverseTransformPoint(other.gameObject.transform.position);
-                    Destroy(other.gameObject);
+                    p.PlaySound();
+                    relativePoint = transform.InverseTransformPoint(other.gameObject.transform.position);                    
                 }
             }
             if (damage > 0)
             {
                 this.m_HP -= damage;
                 StartCoroutine(Hit());
+                m_Source.clip = m_HitClip;
+                m_Source.Play();
                 HandleReactionAnimation(relativePoint);
                 inverseDir = relativePoint;
                 m_PSys.transform.rotation = Quaternion.Slerp(m_PSys.transform.rotation, Quaternion.LookRotation(relativePoint), 1f);
@@ -157,7 +164,6 @@ public class EnemyController : MonoBehaviour
     IEnumerator KillAfterDeath()
     {
         yield return new WaitForSeconds(0.1f);
-
         GameObject ragdoll = Instantiate(m_RagDoll);
         ragdoll.GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = m_DefaultColor;
         ragdoll.transform.position = this.transform.position;

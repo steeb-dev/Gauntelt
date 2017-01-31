@@ -12,6 +12,7 @@ public class BatController : MonoBehaviour {
     public float m_CoolDown = 0.5f;
     bool m_Attacking = false;
     public AudioSource m_Audio;
+    public AudioClip[] m_PunchClips;
 
     // Use this for initialization
     void Start () {
@@ -27,15 +28,18 @@ public class BatController : MonoBehaviour {
 
     IEnumerator AttackCo()
     {
-        if(m_Audio != null && !m_Audio.isPlaying)
-        { m_Audio.Play(); }
-
         m_Attacking = true;
         yield return new WaitForSeconds(m_WarmUp);
         ActivateCollider();
         yield return new WaitForSeconds(m_CoolDown);
         DeactivateCollider();
         m_Attacking = false;
+    }
+
+    public void PlaySound()
+    {
+        if (m_Audio != null)
+        { m_Audio.PlayOneShot(m_PunchClips[Random.Range(0, m_PunchClips.Length)]); }
     }
 
    public void ActivateCollider()

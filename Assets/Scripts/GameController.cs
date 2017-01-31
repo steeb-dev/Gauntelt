@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
     public UnityEngine.UI.Text m_HealthText;
     public UnityEngine.UI.Text m_DeadText;
+    public UnityEngine.UI.RawImage m_Chuck;
 
     public Camera m_DeathCam;
     public Camera m_MainCam;
@@ -30,9 +32,20 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
+        StartCoroutine(KillChuck());
+
         m_DeathCam.enabled = false;
         m_MainCam.enabled = true;
     }
+
+    IEnumerator KillChuck()
+    {
+        yield return new WaitForSeconds(0.25f);
+        m_Chuck.gameObject.SetActive(false);
+
+    }
+
+
 
     void AllDead()
     {

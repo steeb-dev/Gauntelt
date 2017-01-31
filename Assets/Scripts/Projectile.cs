@@ -8,6 +8,8 @@ public class Projectile : MonoBehaviour
     public float m_LifeTime;
     private float m_TimeAlive;
 
+    public AudioSource m_Audio;
+    public AudioClip[] m_PunchClips;
     private Rigidbody m_RigidBody;
 
     public void Awake()
@@ -26,10 +28,19 @@ public class Projectile : MonoBehaviour
     {
         m_RigidBody.AddForce(trajectory  * speed * m_RigidBody.mass * 10, ForceMode.Impulse);
     }
-       
+
     public float GetDamage()
     {
         return Random.Range(m_MinDamage, m_MaxDamage);
+    }
+
+    public void PlaySound()
+    {
+        if (m_Audio != null)
+        {
+            m_Audio.Stop();
+            m_Audio.PlayOneShot(m_PunchClips[Random.Range(0, m_PunchClips.Length)]);
+        }
     }
 }
 

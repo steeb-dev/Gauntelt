@@ -8,7 +8,7 @@ public class PlayerBehaviour : MonoBehaviour
     public float sprintSpeed = 2.0f;                // Default sprint speed.
     public float speedDampTime = 0.1f;              // Default damp time to change the animations based on current speed.
     public float jumpHeight = 1.0f;                 // Default jump height.
-
+    private AudioSource m_Source;
     private float speed;                            // Moving speed.
     private int attack1Bool;                       // Animator variable related to whether or not the player is on ground.
     protected int movingBool;
@@ -41,6 +41,7 @@ public class PlayerBehaviour : MonoBehaviour
     // Start is always called after any Awake functions.
     void Start()
     {
+        m_Source = GetComponent<AudioSource>();
         camScript = playerCamera.GetComponent<ThirdPersonOrbitCam>();
         m_Anim = GetComponent<Animator>();
         rbody = GetComponent<Rigidbody>();
@@ -218,6 +219,7 @@ public class PlayerBehaviour : MonoBehaviour
                 int damage = (int)bc.GetDamage();
                 if (damage > 0)
                 {
+                    m_Source.Play();
                     this.m_HP -= damage;
                     StartCoroutine(Hit());
                     if (m_CooldownTimer > m_HitCooldown)
