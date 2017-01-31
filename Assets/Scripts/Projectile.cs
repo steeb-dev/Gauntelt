@@ -11,6 +11,7 @@ public class Projectile : MonoBehaviour
     public AudioSource m_Audio;
     public AudioClip[] m_PunchClips;
     private Rigidbody m_RigidBody;
+    public GameObject m_Player;
 
     public void Awake()
     {

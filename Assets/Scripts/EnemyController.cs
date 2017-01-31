@@ -30,6 +30,7 @@ public class EnemyController : MonoBehaviour
     public AudioClip m_RantClip;
     public AudioClip m_HitClip;
     AudioSource m_Source;
+    public int m_ScoreVal;
     // Use this for initialization
     void Start ()
     {
@@ -98,6 +99,7 @@ public class EnemyController : MonoBehaviour
     {
         if (!m_Dead)
         {
+            PlayerBehaviour pb = null;
             Vector3 relativePoint = new Vector3(0, 0, 0);
             Vector3 inverseDir = new Vector3(0, 0, 0);
             int damage = 0;
@@ -108,6 +110,7 @@ public class EnemyController : MonoBehaviour
                 bc.PlaySound();
                 relativePoint = transform.InverseTransformPoint(bc.m_Player.transform.position);     
                 inverseDir = new Vector3(-relativePoint.x, relativePoint.y, -relativePoint.z);
+                pb = bc.m_Player.GetComponent<PlayerBehaviour>(); 
             }
             else if (other.gameObject.tag == "Projectile")
             {
@@ -116,7 +119,8 @@ public class EnemyController : MonoBehaviour
                 {
                     damage = (int)p.GetDamage();
                     p.PlaySound();
-                    relativePoint = transform.InverseTransformPoint(other.gameObject.transform.position);                    
+                    relativePoint = transform.InverseTransformPoint(other.gameObject.transform.position);
+                    pb = p.m_Player.GetComponent<PlayerBehaviour>();
                 }
             }
             if (damage > 0)
@@ -129,9 +133,13 @@ public class EnemyController : MonoBehaviour
                 inverseDir = relativePoint;
                 m_PSys.transform.rotation = Quaternion.Slerp(m_PSys.transform.rotation, Quaternion.LookRotation(relativePoint), 1f);
                 m_PSys.Emit(100);
-
+             
                 if (m_HP <= 0)
                 {
+                    if (pb != null)
+                    {
+                        pb.m_Score += m_ScoreVal;
+                    }
                     m_Dead = true;
                     StartCoroutine(KillAfterDeath());
                 }

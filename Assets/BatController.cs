@@ -29,7 +29,6 @@ public class BatController : MonoBehaviour {
     IEnumerator AttackCo()
     {
         m_Attacking = true;
-        yield return new WaitForSeconds(m_WarmUp);
         ActivateCollider();
         yield return new WaitForSeconds(m_CoolDown);
         DeactivateCollider();

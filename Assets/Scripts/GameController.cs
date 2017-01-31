@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
     public UnityEngine.UI.Text m_HealthText;
+    public UnityEngine.UI.Text m_ScoreText;
     public UnityEngine.UI.Text m_DeadText;
     public UnityEngine.UI.RawImage m_Chuck;
 
@@ -16,8 +17,12 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
-        m_HealthText.text = "HP: " + m_Player.m_HP.ToString();
-        if(m_Player.m_Dead)
+        if (m_Player != null)
+        {
+            m_HealthText.text = "HP: " + m_Player.m_HP.ToString();
+            m_ScoreText.text = "Points: " + m_Player.m_Score.ToString();
+        }
+        if (m_Player.m_Dead)
         {
             AllDead();
         }
@@ -25,9 +30,9 @@ public class GameController : MonoBehaviour
         if (Input.GetButtonDown("Restart"))
             UnityEngine.SceneManagement.SceneManager.LoadScene(m_CurrentLevel, UnityEngine.SceneManagement.LoadSceneMode.Single);
 
-        if(m_AllDead)
+        if (m_AllDead)
         { m_DeadText.color = UnityEngine.Random.ColorHSV(); }
-        m_HealthText.color = UnityEngine.Random.ColorHSV(); 
+        m_HealthText.color = UnityEngine.Random.ColorHSV();
     }
 
     private void Start()

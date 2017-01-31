@@ -15,6 +15,7 @@ public class EnemySpawner : MonoBehaviour {
     public float m_HitFlashTime = 0.2f;
     public bool m_Dead = false;
 
+    public int m_ScoreVal;
     // Use this for initialization
     void Start () {
         m_PSys = GetComponent<ParticleSystem>();
@@ -38,18 +39,22 @@ public class EnemySpawner : MonoBehaviour {
     private void OnTriggerEnter(Collider other)
     {
         if (!m_Dead)
-        {         
+        {
+            PlayerBehaviour pb = null;
             int damage = 0;
             if (other.gameObject.tag == "Weapon")
             {
                 BatController bc = other.gameObject.GetComponent<BatController>();
                 damage = (int)bc.GetDamage();
+                pb = bc.m_Player.GetComponent<PlayerBehaviour>();
+
             }
             else if (other.gameObject.tag == "Projectile")
             {
                 Projectile p = other.gameObject.GetComponent<Projectile>();
                 damage = (int)p.GetDamage();
                 Destroy(other.gameObject);
+                pb = p.m_Player.GetComponent<PlayerBehaviour>();
             }
             if (damage > 0)
             {
@@ -60,6 +65,7 @@ public class EnemySpawner : MonoBehaviour {
 
                 if (m_HP <= 0)
                 {
+                    pb.m_Score += m_ScoreVal;
                     m_Dead = true;
                     StopAllCoroutines();
                     StartCoroutine(KillAfterDeath());

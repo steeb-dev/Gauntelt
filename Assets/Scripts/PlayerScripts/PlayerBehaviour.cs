@@ -15,6 +15,7 @@ public class PlayerBehaviour : MonoBehaviour
     private bool attack1 = false;
     public BatController m_Bat;
     public int m_HP;
+    public int m_Score = 0;
     public bool m_Dead;
     public SkinnedMeshRenderer m_MeshRenderer;
     private ParticleSystem m_PSys;
@@ -114,6 +115,7 @@ public class PlayerBehaviour : MonoBehaviour
         GameObject pObj = Instantiate(m_ProjectilePrefab);
         pObj.transform.position = this.transform.position;
         Projectile p = pObj.GetComponent<Projectile>();
+        p.m_Player = this.gameObject;
         p.Init(trajectory);
         m_Firing = false;
     }
@@ -222,12 +224,12 @@ public class PlayerBehaviour : MonoBehaviour
                     m_Source.Play();
                     this.m_HP -= damage;
                     StartCoroutine(Hit());
-                    if (m_CooldownTimer > m_HitCooldown)
-                    {
-                        m_HitCooldown = Random.Range(0.4f, 2f);
-                        m_CooldownTimer = 0f;
-                        HandleReactionAnimation(bc);
-                    }
+                    ////if (m_CooldownTimer > m_HitCooldown)
+                    ////{
+                    ////    m_HitCooldown = Random.Range(0.4f, 2f);
+                    ////    m_CooldownTimer = 0f;
+                    ////    HandleReactionAnimation(bc);
+                    ////}
 
                     //m_PSys.Emit(100);
 
