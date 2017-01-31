@@ -67,14 +67,21 @@ public class PlayerBehaviour : MonoBehaviour
         {
             if (Input.GetButtonDown("Fire1"))
             {
-                m_Anim.SetTrigger("Attack");
-                m_Bat.Attack();
+                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") || (m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && m_Anim.IsInTransition(0)))
+                {
+                    m_Anim.SetTrigger("Attack");
+                    m_Bat.Attack();
+                }
+  
             }
             else if (Input.GetButtonDown("Fire2") && !m_Firing)
             {
                 m_Firing = true;
                 m_Bat.DeactivateCollider();
-                m_Anim.SetTrigger("Projectile");
+                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile"))
+                {
+                    m_Anim.SetTrigger("Projectile");
+                }
                 StartCoroutine(FireProjectile());
             }
             if (h != 0 || v != 0)
