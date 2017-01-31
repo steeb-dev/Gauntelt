@@ -11,6 +11,7 @@ public class BatController : MonoBehaviour {
     public float m_WarmUp = 0.2f;
     public float m_CoolDown = 0.5f;
     bool m_Attacking = false;
+    public AudioSource m_Audio;
 
     // Use this for initialization
     void Start () {
@@ -26,6 +27,9 @@ public class BatController : MonoBehaviour {
 
     IEnumerator AttackCo()
     {
+        if(m_Audio != null && !m_Audio.isPlaying)
+        { m_Audio.Play(); }
+
         m_Attacking = true;
         yield return new WaitForSeconds(m_WarmUp);
         ActivateCollider();

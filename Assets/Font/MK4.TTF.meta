@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 33db4915610620143840ccbf770b2c15
+timeCreated: 1485834551
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Mortal Kombat 4
+  fontNames:
+  - Mortal Kombat 4
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
