@@ -80,9 +80,9 @@ public class PlayerBehaviour : MonoBehaviour
             else { IsMoving = false; }
             m_Anim.SetBool(movingBool, IsMoving);
 
-            if (Input.GetButtonDown("Sprint"))
-            { IsSprinting = true; }
-            else { IsSprinting = false; }
+            //if (Input.GetButtonDown("Sprint"))
+            //{ IsSprinting = true; }
+            //else { IsSprinting = false; }
 
 
             if (IsSprinting)

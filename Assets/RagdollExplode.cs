@@ -16,7 +16,7 @@ public class RagdollExplode : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetButtonDown("Explode"))
         {
             Vector3 explosionPos = new Vector3(this.transform.position.x, this.transform.position.y - 2, this.transform.position.z);
             foreach (Rigidbody rb in rigidBodies)
