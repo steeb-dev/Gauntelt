@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// MoveBehaviour inherits from GenericBehaviour. This class corresponds to basic walk and run behaviour, it is the default behaviour.
-public class PlayerBehaviour : GenericBehaviour
+public class PlayerBehaviour : MonoBehaviour
 {
     public float walkSpeed = 0.15f;                 // Default walk speed.
     public float runSpeed = 1.0f;                   // Default run speed.
@@ -11,10 +10,8 @@ public class PlayerBehaviour : GenericBehaviour
     public float jumpHeight = 1.0f;                 // Default jump height.
 
     private float speed;                            // Moving speed.
-    private int jumpBool;                           // Animator variable related to jumping.
-    private int groundedBool;                       // Animator variable related to whether or not the player is on ground.
     private int attack1Bool;                       // Animator variable related to whether or not the player is on ground.
-    private bool jump;                              // Boolean to determine whether or not the player started a jump.
+    protected int movingBool;
     private bool attack1 = false;
     public BatController m_Bat;
     public int m_HP;
@@ -27,32 +24,45 @@ public class PlayerBehaviour : GenericBehaviour
     public float m_HitCooldown = 0.2f;
     private float m_CooldownTimer = 0f;
     public GameObject m_ProjectilePrefab;
-    private bool m_Firing = false;  
+    private bool m_Firing = false;
     public GameObject m_RagDoll;
+    private float h;                                // Horizontal Axis.
+    private float v;                                // Vertical Axis.
+    private Rigidbody rbody;
+    public float turnSmoothing = 3.0f;
+    private Animator m_Anim;
+    private Vector3 lastDirection;
+    private bool IsMoving;
+    private bool IsSprinting;
+    private int speedFloat;
+    private ThirdPersonOrbitCam camScript;         // Reference to the third person camera script.
+    public float sprintFOV = 100f;
+    public Transform playerCamera;
     // Start is always called after any Awake functions.
     void Start()
     {
+        camScript = playerCamera.GetComponent<ThirdPersonOrbitCam>();
+        m_Anim = GetComponent<Animator>();
+        rbody = GetComponent<Rigidbody>();
         m_PSys = GetComponent<ParticleSystem>();
         m_MeshRenderer.materials[0].color = m_DefaultColor;
         // Set up the references.
-        jumpBool = Animator.StringToHash("Jump");
-        groundedBool = Animator.StringToHash("Grounded");
+        movingBool = Animator.StringToHash("Moving");
         attack1Bool = Animator.StringToHash("Attack1");
-        m_Anim.SetBool(groundedBool, true);
-
-        // Subscribe and register this behaviour as the default behaviour.
-        behaviourManager.SubscribeBehaviour(this);
-        behaviourManager.RegisterDefaultBehaviour(this.behaviourCode);
+        speedFloat  = Animator.StringToHash("Speed");
+        m_Anim.SetBool(movingBool, false);
     }
 
     // Update is used to set features regardless the active behaviour.
     void Update()
     {
+        h = Input.GetAxis("Horizontal");
+        v = Input.GetAxis("Vertical");
+
+
         m_CooldownTimer += Time.deltaTime;
         if (!m_Dead)
         {
-            if (Input.GetButtonDown("Jump"))
-                jump = true;
             if (Input.GetButtonDown("Fire1"))
             {
                 m_Anim.SetTrigger("Attack");
@@ -65,7 +75,26 @@ public class PlayerBehaviour : GenericBehaviour
                 m_Anim.SetTrigger("Projectile");
                 StartCoroutine(FireProjectile());
             }
+            if (h != 0 || v != 0)
+            { IsMoving = true; }
+            else { IsMoving = false; }
+            m_Anim.SetBool(movingBool, IsMoving);
+
+            if (Input.GetButtonDown("Sprint"))
+            { IsSprinting = true; }
+            else { IsSprinting = false; }
+
+
+            if (IsSprinting)
+            {
+                camScript.SetFOV(sprintFOV);
+            }
+            else
+            {
+                camScript.ResetFOV();
+            }
         }
+
     }
 
     IEnumerator FireProjectile()
@@ -89,55 +118,25 @@ public class PlayerBehaviour : GenericBehaviour
     }
 
     // LocalFixedUpdate overrides the virtual function of the base class.
-    public override void LocalFixedUpdate()
+    void FixedUpdate()
     {
         if (!m_Dead)
         {
             // Call the basic movement manager.
-            MovementManagement(behaviourManager.GetH, behaviourManager.GetV, true);
-
-            // Call the jump manager.
-            JumpManagement();
+            MovementManagement(h, v, true);
         }
     }
-
-	// Execute the idle and walk/run jump movements.
-	void JumpManagement()
-	{
-		// Already jumped, landing.
-		if (m_Anim.GetBool(jumpBool) && rbody.velocity.y < 0)
-		{
-			// Set jump boolean on the Animator controller.
-			jump = false;
-			m_Anim.SetBool (jumpBool, false);
-		}
-		// Start jump.
-		if (jump && !m_Anim.GetBool(jumpBool) && IsGrounded())
-		{
-			// Set jump boolean on the Animator controller.
-			m_Anim.SetBool(jumpBool, true);
-			if(speed > 0)
-			{
-				// Set jump vertical impulse when moving.
-				rbody.AddForce (Vector3.up * jumpHeight * rbody.mass * 10, ForceMode.Impulse);
-			}
-		}
-	}
 
     // Deal with the basic player movement
     void MovementManagement(float horizontal, float vertical, bool running)
 	{
-		// On ground, obey gravity.
-		if (m_Anim.GetBool(groundedBool))
-			rbody.useGravity = true;
-
 		// Call function that deals with player orientation.
 		Rotating(horizontal, vertical);
 
 		// Set proper speed.
-		if(behaviourManager.IsMoving())
+		if(IsMoving)
 		{
-			if(behaviourManager.isSprinting())
+			if(IsSprinting)
 			{
 				speed = sprintSpeed;
 			}
@@ -160,11 +159,10 @@ public class PlayerBehaviour : GenericBehaviour
 	// Rotate the player to match correct orientation, according to camera and key pressed.
 	Vector3 Rotating(float horizontal, float vertical)
 	{
-		// Get camera forward direction, without vertical component.
-		Vector3 forward = behaviourManager.playerCamera.TransformDirection(Vector3.forward);
+        Vector3 forward = playerCamera.TransformDirection(Vector3.forward);
 
-		// Player is moving on ground, Y component of camera facing is not relevant.
-		forward.y = 0.0f;
+        // Player is moving on ground, Y component of camera facing is not relevant.
+        forward.y = 0.0f;
 		forward = forward.normalized;
 
 		// Calculate target direction based on camera forward and direction key.
@@ -172,25 +170,43 @@ public class PlayerBehaviour : GenericBehaviour
 		Vector3 targetDirection;
 		float finalTurnSmoothing;
 		targetDirection = forward * vertical + right * horizontal;
-		finalTurnSmoothing = behaviourManager.turnSmoothing;
+        finalTurnSmoothing = turnSmoothing;
 
-		// Lerp current direction to calculated target direction.
-		if((behaviourManager.IsMoving() && targetDirection != Vector3.zero))
+        // Lerp current direction to calculated target direction.
+        if ((IsMoving && targetDirection != Vector3.zero))
 		{
 			Quaternion targetRotation = Quaternion.LookRotation (targetDirection);
 
 			Quaternion newRotation = Quaternion.Slerp(rbody.rotation, targetRotation, finalTurnSmoothing * Time.deltaTime);
 			rbody.MoveRotation (newRotation);
-			behaviourManager.SetLastDirection(targetDirection);
+			SetLastDirection(targetDirection);
 		}
 		// If idle, Ignore current camera facing and consider last moving direction.
 		if(!(Mathf.Abs(horizontal) > 0.9 || Mathf.Abs(vertical) > 0.9))
 		{
-			behaviourManager.Repositioning();
+			Repositioning();
 		}
 
 		return targetDirection;
 	}
+
+    // Set the last player direction of facing.
+    public void SetLastDirection(Vector3 direction)
+    {
+        lastDirection = direction;
+    }
+
+    // Put the player on a standing up position based on last direction faced.
+    public void Repositioning()
+    {
+        if (lastDirection != Vector3.zero)
+        {
+            lastDirection.y = 0;
+            Quaternion targetRotation = Quaternion.LookRotation(lastDirection);
+            Quaternion newRotation = Quaternion.Slerp(rbody.rotation, targetRotation, turnSmoothing * Time.deltaTime);
+            rbody.MoveRotation(newRotation);
+        }
+    }
 
     private void OnTriggerEnter(Collider other)
     {

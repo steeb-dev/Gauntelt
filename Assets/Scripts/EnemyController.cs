@@ -25,10 +25,12 @@ public class EnemyController : MonoBehaviour
     public bool m_Attacking;
     public BatController m_Bat;
     public bool m_Dead;
+    private int movingBool;
 
     // Use this for initialization
     void Start ()
     {
+        movingBool = Animator.StringToHash("Moving");
         m_Anim = GetComponent<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
         m_TargetPlayer = GameObject.FindWithTag("Player");
@@ -49,6 +51,7 @@ public class EnemyController : MonoBehaviour
 
     void FixedUpdate()
     {
+        bool moving = true;
         if (m_TargetPlayer != null)
         {
             float distance = Vector3.Distance(this.transform.position, m_TargetPlayer.transform.position);
@@ -56,15 +59,16 @@ public class EnemyController : MonoBehaviour
             {
                 m_Bat.DeactivateCollider();
                 m_RigidBody.AddForce(m_PlayerDirection * m_RunSpeed);
-                m_Anim.SetFloat(speedFloat, m_RunSpeed, speedDampTime, Time.deltaTime);
+                m_Anim.SetFloat(speedFloat, m_RunSpeed, speedDampTime, Time.deltaTime);  
             }
             else
             {
+                moving = false;
                 if (!m_Attacking)
                 {
                     m_RigidBody.AddForce(-m_PlayerDirection * m_RunSpeed);
                     m_Anim.SetFloat(speedFloat, 0, 0.05f, Time.deltaTime);
-                    m_Attacking = true;
+                    m_Attacking = true;                   
                 }
                 else
                 {
@@ -73,6 +77,7 @@ public class EnemyController : MonoBehaviour
                 }
             }
         }
+        m_Anim.SetBool(movingBool, moving);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -92,9 +97,12 @@ public class EnemyController : MonoBehaviour
             else if (other.gameObject.tag == "Projectile")
             {
                 Projectile p = other.gameObject.GetComponent<Projectile>();
-                damage = (int)p.GetDamage();
-                relativePoint = transform.InverseTransformPoint(other.gameObject.transform.position);
-                Destroy(other.gameObject);
+                if (p != null)
+                {
+                    damage = (int)p.GetDamage();
+                    relativePoint = transform.InverseTransformPoint(other.gameObject.transform.position);
+                    Destroy(other.gameObject);
+                }
             }
             if (damage > 0)
             {

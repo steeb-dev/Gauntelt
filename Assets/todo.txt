@@ -1,7 +1,9 @@
 gauntlet todo
 
 -tweak animation speeds and cooldowns etc.
+-add state machines to both enemy and player controllers.
 -add weapon & projectile spark psys
+-basic sounds
 -add multiplay support
 -enemy - projectile thrower
 -enemy - heavy guy
