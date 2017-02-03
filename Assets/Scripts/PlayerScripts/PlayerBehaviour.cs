@@ -44,10 +44,14 @@ public class PlayerBehaviour : MonoBehaviour
     private GameController m_GameController;
     public int m_Keys;
     public bool m_Finish = false;
+    public GameObject m_PlayerUIPrefab;
 
     // Start is always called after any Awake functions.
     void Start()
     {
+        GameObject UI = Instantiate(m_PlayerUIPrefab);
+        UI.GetComponent<PlayerUI>().m_Player = this;
+        UI.transform.parent = GameObject.Find("PlayerUIPanel").transform;
         m_GameController = FindObjectOfType<GameController>();
         m_Source = GetComponent<AudioSource>();
         camScript = FindObjectOfType<ThirdPersonOrbitCam>();
