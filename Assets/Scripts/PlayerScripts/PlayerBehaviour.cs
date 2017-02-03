@@ -39,6 +39,8 @@ public class PlayerBehaviour : MonoBehaviour
     private ThirdPersonOrbitCam camScript;         // Reference to the third person camera script.
     public float sprintFOV = 100f;
     public Transform playerCamera;
+    public string m_PlayerPrefix;
+
     // Start is always called after any Awake functions.
     void Start()
     {
@@ -58,14 +60,14 @@ public class PlayerBehaviour : MonoBehaviour
     // Update is used to set features regardless the active behaviour.
     void Update()
     {
-        h = Input.GetAxis("Horizontal");
-        v = Input.GetAxis("Vertical");
+        h = Input.GetAxis(m_PlayerPrefix + "Horizontal");
+        v = Input.GetAxis(m_PlayerPrefix + "Vertical");
 
-
+         
         m_CooldownTimer += Time.deltaTime;
         if (!m_Dead)
         {
-            if (Input.GetButtonDown("Fire1"))
+            if (Input.GetButtonDown(m_PlayerPrefix + "Fire1"))
             {
                 if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") || (m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && m_Anim.IsInTransition(0)))
                 {
@@ -74,7 +76,7 @@ public class PlayerBehaviour : MonoBehaviour
                 }
   
             }
-            else if (Input.GetButtonDown("Fire2") && !m_Firing)
+            else if (Input.GetButtonDown(m_PlayerPrefix + "Fire2") && !m_Firing)
             {
                 m_Firing = true;
                 m_Bat.DeactivateCollider();
@@ -225,27 +227,30 @@ public class PlayerBehaviour : MonoBehaviour
             if (!m_Dead)
             {
                 BatController bc = other.gameObject.GetComponent<BatController>();
+                if(bc.m_Player != null && bc.m_Player.gameObject.tag != "Player")
+                { 
                 int damage = (int)bc.GetDamage();
-                if (damage > 0)
-                {
-                    bc.PlaySound();
-
-                    m_Source.Play();
-                    this.m_HP -= damage;
-                    StartCoroutine(Hit());
-                    ////if (m_CooldownTimer > m_HitCooldown)
-                    ////{
-                    ////    m_HitCooldown = Random.Range(0.4f, 2f);
-                    ////    m_CooldownTimer = 0f;
-                    ////    HandleReactionAnimation(bc);
-                    ////}
-
-                    //m_PSys.Emit(100);
-
-                    if (m_HP <= 0)
+                    if (damage > 0)
                     {
-                        StopAllCoroutines();
-                        StartCoroutine(KillAfterDeath());
+                        bc.PlaySound();
+
+                        m_Source.Play();
+                        this.m_HP -= damage;
+                        StartCoroutine(Hit());
+                        ////if (m_CooldownTimer > m_HitCooldown)
+                        ////{
+                        ////    m_HitCooldown = Random.Range(0.4f, 2f);
+                        ////    m_CooldownTimer = 0f;
+                        ////    HandleReactionAnimation(bc);
+                        ////}
+
+                        //m_PSys.Emit(100);
+
+                        if (m_HP <= 0)
+                        {
+                            StopAllCoroutines();
+                            StartCoroutine(KillAfterDeath());
+                        }
                     }
                 }
             }

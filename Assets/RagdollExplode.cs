@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RagdollExplode : MonoBehaviour {
+public class RagdollExplode : MonoBehaviour
+{
 
     Rigidbody[] rigidBodies;
-
-	// Use this for initialization
-	void Start () {
+    private float m_Timer = 0f;
+    private float m_LifeTime = 225f;
+    // Use this for initialization
+    void Awake()
+    {
         rigidBodies = GetComponentsInChildren<Rigidbody>();
 
     }
@@ -15,13 +18,8 @@ public class RagdollExplode : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Explode"))
-        {
-            Vector3 explosionPos = new Vector3(this.transform.position.x, this.transform.position.y - 2, this.transform.position.z);
-            foreach (Rigidbody rb in rigidBodies)
-            {
-                rb.AddExplosionForce(10000, explosionPos, 100);
-            }
-        }
-    }
+        m_Timer += Time.deltaTime;
+        if (m_Timer > m_LifeTime)
+        { Destroy(this.gameObject); }
+    }   
 }

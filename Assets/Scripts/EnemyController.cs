@@ -14,7 +14,7 @@ public class EnemyController : MonoBehaviour
     private Animator m_Anim;
     private Rigidbody m_RigidBody;
     public GameObject m_RagDoll;
-    public GameObject m_TargetPlayer;
+    public PlayerBehaviour m_TargetPlayer;
     private Vector3 m_PlayerDirection;
     private float m_TurnSpeed = 5.0f;
     public float m_RunSpeed = 1.0f;
@@ -30,16 +30,18 @@ public class EnemyController : MonoBehaviour
     public AudioClip m_HitClip;
     AudioSource m_Source;
     public int m_ScoreVal;
+    private GameController m_GameController;
+
     // Use this for initialization
     void Start ()
     {
         m_Source = GetComponent<AudioSource>();
-
+        m_GameController = FindObjectOfType<GameController>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
         movingBool = Animator.StringToHash("Moving");
         m_Anim = GetComponent<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
-        m_TargetPlayer = GameObject.FindWithTag("Player");
+        m_TargetPlayer = m_GameController.GetTargetPlayer();
         m_MeshRenderer.materials[0].color = m_DefaultColor;
         speedFloat = Animator.StringToHash("Speed");
     }
@@ -47,13 +49,9 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Explode"))
+        if(m_TargetPlayer == null || m_TargetPlayer.m_Dead)
         {
-            Vector3 explosionPos = new Vector3(this.transform.position.x, this.transform.position.y - 2, this.transform.position.z);
-            foreach (Rigidbody rb in rigidBodies)
-            {
-                rb.AddExplosionForce(100000, explosionPos, 100);
-            }
+            m_TargetPlayer = m_GameController.GetTargetPlayer();
         }
         if (m_TargetPlayer != null)
         {

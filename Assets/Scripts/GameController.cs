@@ -4,36 +4,62 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    public UnityEngine.UI.Text m_HealthText;
-    public UnityEngine.UI.Text m_ScoreText;
+    public UnityEngine.UI.Text m_P1HealthText;
+    public UnityEngine.UI.Text m_P1ScoreText;
+
+    public UnityEngine.UI.Text m_P2HealthText;
+    public UnityEngine.UI.Text m_P2ScoreText;
+
     public UnityEngine.UI.Text m_DeadText;
     public UnityEngine.UI.Text m_StartText;
-    public GameObject m_Rasta;
+    public PlayerBehaviour m_P1;
+    public PlayerBehaviour m_P2;
+    public int m_NumActivePlayers = 2;
 
     public Camera m_DeathCam;
     public Camera m_MainCam;
-    public PlayerBehaviour m_Player;
     private int m_CurrentLevel = 0;
     private bool m_AllDead =false;
 
+    public PlayerBehaviour GetTargetPlayer()
+    {
+        float playerToTarget = UnityEngine.Random.Range(1,3);
+        if (playerToTarget == 2)
+        {
+            return m_P2;
+        }
+        else
+        {
+            return m_P1;
+        }
+
+    }
+
     private void Update()
     {
-        if (m_Player != null)
+        if (m_P1 != null)
         {
-            m_HealthText.text = "HP: " + m_Player.m_HP.ToString();
-            m_ScoreText.text = "Points: " + m_Player.m_Score.ToString();
+            m_P1HealthText.text = "HP: " + m_P1.m_HP.ToString();
+            m_P1ScoreText.text = "Points: " + m_P1.m_Score.ToString();
 
-            if(m_Player.m_Score == 420 && m_Rasta != null && m_Rasta.activeSelf == false)
+            if(m_P1.m_HP < 40)
             {
-                m_Rasta.SetActive(true);
-            }
-
-            if(m_Player.m_HP < 40)
-            {
-                m_HealthText.color = UnityEngine.Random.ColorHSV();
+                m_P1HealthText.color = UnityEngine.Random.ColorHSV();
             }
         }
-        if (m_Player.m_Dead)
+
+        if (m_P2 != null)
+        {
+            m_P2HealthText.text = "HP: " + m_P2.m_HP.ToString();
+            m_P2ScoreText.text = "Points: " + m_P2.m_Score.ToString();
+
+            if (m_P2.m_HP < 40)
+            {
+                m_P2HealthText.color = UnityEngine.Random.ColorHSV();
+            }
+        }
+
+        if (m_P1.m_Dead && m_P2.m_Dead)
         {
             AllDead();
         }
@@ -44,19 +70,20 @@ public class GameController : MonoBehaviour
         if (m_AllDead)
         {
             m_DeadText.color = UnityEngine.Random.ColorHSV();
-            m_HealthText.color = UnityEngine.Random.ColorHSV();
+            m_P1HealthText.color = UnityEngine.Random.ColorHSV();
+            m_P2HealthText.color = UnityEngine.Random.ColorHSV();
         }
     }
 
     private void Start()
     {
-        StartCoroutine(KillChuck());
+        StartCoroutine(KillSplash());
 
         m_DeathCam.enabled = false;
         m_MainCam.enabled = true;
     }
 
-    IEnumerator KillChuck()
+    IEnumerator KillSplash()
     {
         yield return new WaitForSeconds(0.25f);
         m_StartText.gameObject.SetActive(false);
