@@ -21,18 +21,15 @@ public class GameController : MonoBehaviour
     private int m_CurrentLevel = 0;
     private bool m_AllDead =false;
 
-    public PlayerBehaviour GetTargetPlayer()
+    public PlayerBehaviour GetTargetPlayer(Vector3 position)
     {
-        float playerToTarget = UnityEngine.Random.Range(1,3);
-        if (playerToTarget == 2)
-        {
-            return m_P2;
-        }
-        else
-        {
-            return m_P1;
-        }
+        float P1Dist =  Vector3.Distance(position, m_P1.transform.position);
+        float P2Dist = Vector3.Distance(position, m_P2.transform.position);
 
+        if(P1Dist < P2Dist)
+        { return m_P1; }
+        else
+        { return m_P2; }
     }
 
     private void Update()

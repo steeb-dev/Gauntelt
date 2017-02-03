@@ -41,7 +41,7 @@ public class EnemyController : MonoBehaviour
         movingBool = Animator.StringToHash("Moving");
         m_Anim = GetComponent<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
-        m_TargetPlayer = m_GameController.GetTargetPlayer();
+        m_TargetPlayer = m_GameController.GetTargetPlayer(transform.position);
         m_MeshRenderer.materials[0].color = m_DefaultColor;
         speedFloat = Animator.StringToHash("Speed");
     }
@@ -51,7 +51,7 @@ public class EnemyController : MonoBehaviour
     {
         if(m_TargetPlayer == null || m_TargetPlayer.m_Dead)
         {
-            m_TargetPlayer = m_GameController.GetTargetPlayer();
+            m_TargetPlayer = m_GameController.GetTargetPlayer(transform.position);
         }
         if (m_TargetPlayer != null)
         {

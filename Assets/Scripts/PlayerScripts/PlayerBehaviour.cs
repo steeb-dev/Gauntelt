@@ -40,6 +40,7 @@ public class PlayerBehaviour : MonoBehaviour
     public float sprintFOV = 100f;
     public Transform playerCamera;
     public string m_PlayerPrefix;
+    public GameObject[] m_KillObjects;
 
     // Start is always called after any Awake functions.
     void Start()
@@ -291,7 +292,13 @@ public class PlayerBehaviour : MonoBehaviour
         ragdoll.GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = m_DefaultColor;
         ragdoll.transform.position = this.transform.position;
         ragdoll.transform.rotation = this.transform.rotation;
-        Destroy(this.gameObject);
+        ragdoll.transform.parent = this.transform;
+
+        Destroy(m_Anim);
+        foreach (GameObject go in m_KillObjects)
+        {
+            Destroy(go);
+        }
     }
 
 
