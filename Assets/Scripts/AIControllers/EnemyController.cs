@@ -128,7 +128,6 @@ public class EnemyController : MonoBehaviour
                 StartCoroutine(Hit());
                 m_Source.clip = m_HitClip;
                 m_Source.Play();
-                HandleReactionAnimation(relativePoint);
                 inverseDir = relativePoint;
                 m_PSys.transform.rotation = Quaternion.Slerp(m_PSys.transform.rotation, Quaternion.LookRotation(relativePoint), 1f);
                 m_PSys.Emit(100);
@@ -146,28 +145,7 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    void HandleReactionAnimation(Vector3 relativePoint)
-    {        
-        string[] hitArray = new string[] { "HitLeft", "HitRight", "HitFront", "HitBack" };
-        float xWeight, yWeight;
-        xWeight = Mathf.Abs(relativePoint.x);
-        yWeight = Mathf.Abs(relativePoint.y);
-        int animIndex = 0;
-        if (xWeight > yWeight)
-        {
-            if (relativePoint.x < 0){animIndex = 0;}
-            else{animIndex = 1;}
-        }
-        else
-        {
-            if (relativePoint.z > 0){animIndex = 2;}
-            else{animIndex = 3;}
-        }
-
-        m_Anim.SetTrigger(hitArray[animIndex]);
-    }
-
-
+ 
     IEnumerator KillAfterDeath()
     {
         yield return new WaitForSeconds(0.1f);
@@ -175,6 +153,7 @@ public class EnemyController : MonoBehaviour
         ragdoll.GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = m_DefaultColor;
         ragdoll.transform.position = this.transform.position;
         ragdoll.transform.rotation= this.transform.rotation;
+        ragdoll.transform.localScale = this.transform.localScale;
         Destroy(this.gameObject);
     }
 

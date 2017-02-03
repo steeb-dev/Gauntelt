@@ -4,15 +4,11 @@ using UnityEngine;
 
 public class RagdollExplode : MonoBehaviour
 {
-
-    Rigidbody[] rigidBodies;
     private float m_Timer = 0f;
     private float m_LifeTime = 225f;
     // Use this for initialization
     void Awake()
     {
-        rigidBodies = GetComponentsInChildren<Rigidbody>();
-
     }
 
     // Update is called once per frame
