@@ -15,7 +15,7 @@ public class GameController : MonoBehaviour
 
     public Camera m_DeathCam;
     public Camera m_MainCam;
-    private int m_CurrentLevel = 0;
+    public int m_CurrentLevel = 0;
     public int m_LevelCount = 1;
 
     private bool m_AllDead =false;
