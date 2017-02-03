@@ -42,6 +42,8 @@ public class PlayerBehaviour : MonoBehaviour
     public string m_PlayerPrefix;
     public GameObject[] m_KillObjects;
     private GameController m_GameController;
+    public int m_Keys;
+    public bool m_Finish = false;
 
     // Start is always called after any Awake functions.
     void Start()
@@ -60,16 +62,34 @@ public class PlayerBehaviour : MonoBehaviour
         m_Anim.SetBool(movingBool, false);
     }
 
+    public IEnumerator FinishAnim()
+    {
+        m_Finish = true;
+        m_Anim.SetBool(movingBool, false);
+        rbody.ResetCenterOfMass();
+        rbody.ResetInertiaTensor();
+        float timer = 0;
+        while (timer < m_GameController.m_ExitTime)
+        {
+            this.transform.RotateAroundLocal(new Vector3(0, 1, 0), 0.25f);
+            this.transform.localScale -= new Vector3(0.005f, 0.005f, 0.005f);
+            timer += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+            //Put in transform rotation here
+    }
+
     // Update is used to set features regardless the active behaviour.
     void Update()
     {
-        h = Input.GetAxis(m_PlayerPrefix + "Horizontal");
-        v = Input.GetAxis(m_PlayerPrefix + "Vertical");
-
-         
-        m_CooldownTimer += Time.deltaTime;
-        if (!m_Dead)
+        if (!m_Dead && !m_Finish)
         {
+            h = Input.GetAxis(m_PlayerPrefix + "Horizontal");
+            v = Input.GetAxis(m_PlayerPrefix + "Vertical");
+
+
+            m_CooldownTimer += Time.deltaTime;
+
             if (Input.GetButtonDown(m_PlayerPrefix + "Fire1"))
             {
                 if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") || (m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && m_Anim.IsInTransition(0)))
@@ -89,9 +109,11 @@ public class PlayerBehaviour : MonoBehaviour
                 }
                 StartCoroutine(FireProjectile());
             }
+
             if (h != 0 || v != 0)
             { IsMoving = true; }
             else { IsMoving = false; }
+
             m_Anim.SetBool(movingBool, IsMoving);
 
             if (Input.GetButtonDown(m_PlayerPrefix + "Teleport"))
@@ -145,7 +167,7 @@ public class PlayerBehaviour : MonoBehaviour
     // LocalFixedUpdate overrides the virtual function of the base class.
     void FixedUpdate()
     {
-        if (!m_Dead)
+        if (!m_Dead && !m_Finish)
         {
             // Call the basic movement manager.
             MovementManagement(h, v, true);

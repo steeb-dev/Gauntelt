@@ -78,8 +78,8 @@ public class EnemySpawner : MonoBehaviour {
     IEnumerator KillAfterDeath()
     {
         m_MeshRenderer.materials[0].color = m_HitColor;
-        yield return new WaitForSeconds(0.1f);
-        Destroy(this);
+        yield return new WaitForSeconds(2f);
+        Destroy(this.gameObject);
     }
 
     IEnumerator Hit()

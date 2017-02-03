@@ -7,6 +7,8 @@ public class GameController : MonoBehaviour
     public UnityEngine.UI.Text m_P1HealthText;
     public UnityEngine.UI.Text m_P1ScoreText;
 
+    public GameObject m_P2UI;
+
     public UnityEngine.UI.Text m_P2HealthText;
     public UnityEngine.UI.Text m_P2ScoreText;
 
@@ -19,7 +21,22 @@ public class GameController : MonoBehaviour
     public Camera m_DeathCam;
     public Camera m_MainCam;
     private int m_CurrentLevel = 0;
+    public int m_LevelCount = 1;
+
     private bool m_AllDead =false;
+    public float m_ExitTime = 1.5f;
+
+    public IEnumerator FinishLevel()
+    {
+        StartCoroutine(m_P1.FinishAnim());
+        if(m_NumActivePlayers == 2) StartCoroutine(m_P2.FinishAnim());
+        yield return new WaitForSeconds(m_ExitTime);
+        m_CurrentLevel++;
+        if(m_CurrentLevel >= m_LevelCount)
+        { m_CurrentLevel = 0; }
+        UnityEngine.SceneManagement.SceneManager.LoadScene(m_CurrentLevel, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+    }
 
     public PlayerBehaviour GetTargetPlayer(Vector3 position)
     {
@@ -45,7 +62,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        if (m_P2 != null)
+        if (m_NumActivePlayers == 2 && m_P2 != null)
         {
             m_P2HealthText.text = "HP: " + m_P2.m_HP.ToString();
             m_P2ScoreText.text = "Points: " + m_P2.m_Score.ToString();
@@ -56,7 +73,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        if (m_P1.m_Dead && m_P2.m_Dead)
+        if (m_P1.m_Dead && (m_NumActivePlayers == 1 || m_P2.m_Dead))
         {
             AllDead();
         }
@@ -78,6 +95,8 @@ public class GameController : MonoBehaviour
 
         m_DeathCam.enabled = false;
         m_MainCam.enabled = true;
+        if (m_NumActivePlayers == 1) m_P2UI.SetActive(false);
+        if (m_NumActivePlayers == 1) m_P2.gameObject.SetActive(false);
     }
 
     IEnumerator KillSplash()
@@ -98,7 +117,7 @@ public class GameController : MonoBehaviour
             m_MainCam.gameObject.GetComponent<ThirdPersonOrbitCam>().enabled = false;
             m_MainCam.enabled = false;
             m_DeadText.gameObject.SetActive(true);
-
+            StartCoroutine(FinishLevel());
         }
     }
 }
