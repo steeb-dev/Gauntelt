@@ -97,21 +97,21 @@ public class PlayerBehaviour : MonoBehaviour
 
             if (Input.GetButtonDown(m_PlayerPrefix + "Fire1"))
             {
-                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") || (m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && m_Anim.IsInTransition(0)))
+                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && !(m_Anim.IsInTransition(0) && m_Anim.GetNextAnimatorStateInfo(0).IsName("Attack")))
                 {
                     m_Anim.SetTrigger("Attack");
                     m_Bat.Attack();
                 }
-  
             }
             else if (Input.GetButtonDown(m_PlayerPrefix + "Fire2") && !m_Firing)
             {
-                m_Firing = true;
                 m_Bat.DeactivateCollider();
-                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile"))
+                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile") && !(m_Anim.IsInTransition(0) && m_Anim.GetNextAnimatorStateInfo(0).IsName("Projectile")))
                 {
+                    m_Firing = true;
                     m_Anim.SetTrigger("Projectile");
                 }
+             
                 StartCoroutine(FireProjectile());
             }
 
@@ -146,7 +146,7 @@ public class PlayerBehaviour : MonoBehaviour
         bool loop = true;
         while(loop)
         {
-            if(m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile"))
+            if(m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile") || (m_Anim.GetNextAnimatorStateInfo(0).IsName("Projectile") && m_Anim.IsInTransition(0)))
             {
                 loop = false;
             }
