@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
-
     public float m_HP;
     public Color m_DefaultColor;
     public float m_HitFlashTime = 0.2f;

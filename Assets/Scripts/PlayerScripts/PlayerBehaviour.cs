@@ -38,7 +38,7 @@ public class PlayerBehaviour : MonoBehaviour
     private int speedFloat;
     private ThirdPersonOrbitCam camScript;         // Reference to the third person camera script.
     public float sprintFOV = 100f;
-    public Transform playerCamera;
+    private Transform playerCamera;
     public string m_PlayerPrefix;
     public GameObject[] m_KillObjects;
     private GameController m_GameController;
@@ -50,7 +50,8 @@ public class PlayerBehaviour : MonoBehaviour
     {
         m_GameController = FindObjectOfType<GameController>();
         m_Source = GetComponent<AudioSource>();
-        camScript = playerCamera.GetComponent<ThirdPersonOrbitCam>();
+        camScript = FindObjectOfType<ThirdPersonOrbitCam>();
+        playerCamera = camScript.transform;
         m_Anim = GetComponent<Animator>();
         rbody = GetComponent<Rigidbody>();
         m_PSys = GetComponent<ParticleSystem>();
@@ -118,16 +119,8 @@ public class PlayerBehaviour : MonoBehaviour
 
             if (Input.GetButtonDown(m_PlayerPrefix + "Teleport"))
             {
-                if (m_PlayerPrefix == "P1")
-                {
-                    Vector3 teleportPos = m_GameController.m_P2.transform.position + new Vector3(0, 0, 0);
-                    this.transform.position = teleportPos;
-                }
-                if (m_PlayerPrefix == "P2")
-                {
-                    Vector3 teleportPos = m_GameController.m_P1.transform.position + new Vector3(0, 0, 0);
-                    this.transform.position = teleportPos;
-                }
+                Vector3 teleportPos = m_GameController.m_Players[0].transform.position + new Vector3(0, 0, 0);
+                this.transform.position = teleportPos;
             }
           
 

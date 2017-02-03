@@ -3,7 +3,7 @@ using System.Collections;
 
 public class ThirdPersonOrbitCam : MonoBehaviour 
 {
-	public Transform player;                                           // Player's reference.
+	private Transform player;                                           // Player's reference.
 	public Vector3 pivotOffset = new Vector3(0.0f, 1.0f,  0.0f);       // Offset to repoint the camera.
 	public Vector3 camOffset   = new Vector3(0.0f, 0.7f, -3.0f);       // Offset to relocate the camera related to the player position.
 	public float smooth = 10f;                                         // Speed of camera responsiveness.
@@ -24,9 +24,11 @@ public class ThirdPersonOrbitCam : MonoBehaviour
 	private float defaultFOV;                                          // Default camera Field of View.
 	private float targetFOV;                                           // Target camera FIeld of View.
 	private float targetMaxVerticalAngle;                              // Custom camera max vertical clamp angle. 
+    public GameController m_Controller;
 
 	void Awake()
 	{
+        player = m_Controller.m_Players[0].transform;
 		// Reference to the camera transform.
 		cam = transform;
 
