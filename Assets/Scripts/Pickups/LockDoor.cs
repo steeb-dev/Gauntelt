@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class LockDoor : MonoBehaviour {
 
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
-        PlayerBehaviour pb = other.gameObject.GetComponent<PlayerBehaviour>();
+        PlayerBehaviour pb = collision.gameObject.GetComponent<PlayerBehaviour>();
         if (pb != null)
         {
             if (pb.m_Keys >= 1)
