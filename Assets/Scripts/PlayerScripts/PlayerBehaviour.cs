@@ -41,10 +41,12 @@ public class PlayerBehaviour : MonoBehaviour
     public Transform playerCamera;
     public string m_PlayerPrefix;
     public GameObject[] m_KillObjects;
+    private GameController m_GameController;
 
     // Start is always called after any Awake functions.
     void Start()
     {
+        m_GameController = FindObjectOfType<GameController>();
         m_Source = GetComponent<AudioSource>();
         camScript = playerCamera.GetComponent<ThirdPersonOrbitCam>();
         m_Anim = GetComponent<Animator>();
@@ -92,10 +94,20 @@ public class PlayerBehaviour : MonoBehaviour
             else { IsMoving = false; }
             m_Anim.SetBool(movingBool, IsMoving);
 
-            //if (Input.GetButtonDown("Sprint"))
-            //{ IsSprinting = true; }
-            //else { IsSprinting = false; }
-
+            if (Input.GetButtonDown(m_PlayerPrefix + "Teleport"))
+            {
+                if (m_PlayerPrefix == "P1")
+                {
+                    Vector3 teleportPos = m_GameController.m_P2.transform.position + new Vector3(0, 0, 0);
+                    this.transform.position = teleportPos;
+                }
+                if (m_PlayerPrefix == "P2")
+                {
+                    Vector3 teleportPos = m_GameController.m_P1.transform.position + new Vector3(0, 0, 0);
+                    this.transform.position = teleportPos;
+                }
+            }
+          
 
             if (IsSprinting)
             {
