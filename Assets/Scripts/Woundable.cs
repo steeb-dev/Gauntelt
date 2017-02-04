@@ -20,6 +20,9 @@ public class Woundable : MonoBehaviour
     public delegate void KillConfirm(GameObject other);
     public KillConfirm OnKillConfirm;
 
+    public delegate void HitConfirm(GameObject other);
+    public KillConfirm OnHitConfirm;
+
     private void Start()
     {
         m_Source = GetComponent<AudioSource>();
@@ -81,6 +84,8 @@ public class Woundable : MonoBehaviour
                 }
                 else
                 {
+                    if(OnHitConfirm != null)
+                    OnHitConfirm(ownerObject);
                     StartCoroutine(Hit());
                 }
             }

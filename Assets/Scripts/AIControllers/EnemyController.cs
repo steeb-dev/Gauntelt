@@ -18,7 +18,6 @@ public enum EnemyState
 public class EnemyController : Woundable
 {
     public EnemyState m_State;
-    public CombatType m_Type;
     public float m_AlertRange;
     public ParticleSystem m_PSys;
     private Animator m_Anim;
@@ -44,7 +43,6 @@ public class EnemyController : Woundable
     // Use this for initialization
     void Start ()
     {
-        m_State = EnemyState.Alert;
         m_GameController = FindObjectOfType<GameController>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
         movingBool = Animator.StringToHash("Moving");
@@ -53,15 +51,29 @@ public class EnemyController : Woundable
         m_TargetPlayer = m_GameController.GetTargetPlayer(transform.position);
         m_MeshRenderer.materials[0].color = m_DefaultColor;
         speedFloat = Animator.StringToHash("Speed");
-        this.OnKillConfirm += Killed;
+        this.OnKillConfirm += KillConfirmed;
+        this.OnHitConfirm += HitConfirmed;
     }
 
-    void Killed(GameObject other)
+    void KillConfirmed(GameObject other)
     {
         PlayerBehaviour pb = other.GetComponent<PlayerBehaviour>();
         if(pb != null)
         {
             pb.m_Score += this.m_ScoreVal;
+        }
+    }
+
+    void HitConfirmed(GameObject other)
+    {
+        PlayerBehaviour pb = other.GetComponent<PlayerBehaviour>();
+        if (pb != null)
+        {
+            if (m_State == EnemyState.Chill)
+            {
+                m_State = EnemyState.Alert;
+                m_TargetPlayer = pb;
+            }
         }
     }
 
@@ -80,55 +92,67 @@ public class EnemyController : Woundable
                 m_PlayerDirection.Normalize();
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(m_PlayerDirection), m_TurnSpeed * Time.deltaTime);
             }
-        } 
+        }
+        else if (m_State == EnemyState.Chill)
+        {
+            if (m_GameController.GetMinPlayerDistance(this.transform.position) < m_AlertRange)
+            {
+                m_State = EnemyState.Alert;
+            }
+            m_TargetPlayer = m_GameController.GetTargetPlayer(transform.position);
+
+        }
     }
 
     void FixedUpdate()
     {
-        bool moving = true;
-        if (m_TargetPlayer != null)
+        if (m_State == EnemyState.Alert)
         {
-            float distance = Vector3.Distance(this.transform.position, m_TargetPlayer.transform.position);
-            if (distance > m_AttackRange)
+            bool moving = true;
+            if (m_TargetPlayer != null)
             {
-                m_Bat.DeactivateCollider();
-                m_RigidBody.AddForce(m_PlayerDirection * m_RunSpeed);
-                m_Anim.SetFloat(speedFloat, m_RunSpeed, speedDampTime, Time.deltaTime);  
-            }
-            else
-            {
-                moving = false;
-                if (!m_Attacking)
+                float distance = Vector3.Distance(this.transform.position, m_TargetPlayer.transform.position);
+                if (distance > m_AttackRange)
                 {
-                    m_RigidBody.AddForce(-m_PlayerDirection * m_RunSpeed);
-                    m_Anim.SetFloat(speedFloat, 0, 0.05f, Time.deltaTime);
-                    m_Attacking = true;
+                    m_Bat.DeactivateCollider();
+                    m_RigidBody.AddForce(m_PlayerDirection * m_RunSpeed);
+                    m_Anim.SetFloat(speedFloat, m_RunSpeed, speedDampTime, Time.deltaTime);
                 }
                 else
                 {
-                    switch (m_CombatType)
+                    moving = false;
+                    if (!m_Attacking)
                     {
-                        case CombatType.Melee:
-                            if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && !m_Anim.IsInTransition(0))
-                            {
-                                m_Anim.SetTrigger("Attack");
-                                m_Bat.Attack();
-                            }
-                            break;
-                        case CombatType.Projectile:
-                            m_Bat.DeactivateCollider();
-                            if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile") && !(m_Anim.IsInTransition(0) && m_Anim.GetNextAnimatorStateInfo(0).IsName("Projectile")))
-                            {
-                                m_Attacking = true;
-                                m_Anim.SetTrigger("Projectile");
-                                StartCoroutine(FireProjectile());
-                            }
-                            break;
+                        m_RigidBody.AddForce(-m_PlayerDirection * m_RunSpeed);
+                        m_Anim.SetFloat(speedFloat, 0, 0.05f, Time.deltaTime);
+                        m_Attacking = true;
+                    }
+                    else
+                    {
+                        switch (m_CombatType)
+                        {
+                            case CombatType.Melee:
+                                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && !m_Anim.IsInTransition(0))
+                                {
+                                    m_Anim.SetTrigger("Attack");
+                                    m_Bat.Attack();
+                                }
+                                break;
+                            case CombatType.Projectile:
+                                m_Bat.DeactivateCollider();
+                                if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile") && !(m_Anim.IsInTransition(0) && m_Anim.GetNextAnimatorStateInfo(0).IsName("Projectile")))
+                                {
+                                    m_Attacking = true;
+                                    m_Anim.SetTrigger("Projectile");
+                                    StartCoroutine(FireProjectile());
+                                }
+                                break;
+                        }
                     }
                 }
             }
+            m_Anim.SetBool(movingBool, moving);
         }
-        m_Anim.SetBool(movingBool, moving);
     }
 
     IEnumerator FireProjectile()

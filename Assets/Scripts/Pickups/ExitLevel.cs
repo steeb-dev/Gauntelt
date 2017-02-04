@@ -21,7 +21,7 @@ public class ExitLevel : MonoBehaviour {
         if (m_WaitingPlayers.Count == m_GameController.m_NumActivePlayers)
         {
             m_HighlightRenderer.materials[0].color = m_FinishColor;
-            StartCoroutine(m_GameController.FinishLevel());
+            StartCoroutine(m_GameController.FinishLevel(true));
         }
     }
 

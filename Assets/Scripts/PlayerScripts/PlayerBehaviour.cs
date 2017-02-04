@@ -57,6 +57,7 @@ public class PlayerBehaviour : Woundable
 
     public IEnumerator FinishAnim()
     {
+        m_Finish = true;
         m_Invincible = true;
         m_Anim.SetBool(movingBool, false);
         rbody.ResetCenterOfMass();
@@ -75,7 +76,12 @@ public class PlayerBehaviour : Woundable
     // Update is used to set features regardless the active behaviour.
     void Update()
     {
-        if (!m_Dead && !m_Finish)
+        if(m_Finish)
+        {
+            h = 0;
+            v = 0;
+        }
+        if (!m_Dead)
         {
             h = Input.GetAxis(m_PlayerPrefix + "Horizontal");
             v = Input.GetAxis(m_PlayerPrefix + "Vertical");
@@ -149,7 +155,7 @@ public class PlayerBehaviour : Woundable
     // LocalFixedUpdate overrides the virtual function of the base class.
     void FixedUpdate()
     {
-        if (!m_Dead && !m_Finish)
+        if (!m_Dead)
         {
             // Call the basic movement manager.
             MovementManagement(h, v, true);

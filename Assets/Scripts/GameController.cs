@@ -21,18 +21,22 @@ public class GameController : MonoBehaviour
     public float m_ExitTime = 1.5f;
     private bool m_Init = false;
 
-    public IEnumerator FinishLevel()
+    public IEnumerator FinishLevel(bool goNext)
     {
         foreach (PlayerBehaviour pb in m_Players)
         {
             StartCoroutine(pb.FinishAnim());
         }
         yield return new WaitForSeconds(m_ExitTime);
-        m_CurrentLevel++;
-        if(m_CurrentLevel >= PlayerTracker. m_LevelCount)
+        if (goNext)
+        {
+            m_CurrentLevel++;
+            PlayerTracker.SetStats(this);
+        }
+
+        if (m_CurrentLevel >= PlayerTracker. m_LevelCount)
         { m_CurrentLevel = 0; }
 
-        PlayerTracker.SetStats(this);
         UnityEngine.SceneManagement.SceneManager.LoadScene(m_CurrentLevel, UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
@@ -42,7 +46,7 @@ public class GameController : MonoBehaviour
         PlayerBehaviour closestPlayer = m_Players[0];
         foreach (PlayerBehaviour pb in m_Players)
         {
-            float distance = Vector3.Distance(this.transform.position, pb.transform.position);
+            float distance = Vector3.Distance(position, pb.transform.position);
 
             if (distance < minDist)
             {
@@ -51,6 +55,21 @@ public class GameController : MonoBehaviour
             }
         }
         return closestPlayer;
+    }
+
+    public float GetMinPlayerDistance(Vector3 position)
+    {
+        float minDist = 1000000f;
+        foreach (PlayerBehaviour pb in m_Players)
+        {
+            float distance = Vector3.Distance(position, pb.transform.position);
+
+            if (distance < minDist)
+            {
+                minDist = distance;
+            }
+        }
+        return minDist;
     }
 
     private void Update()
@@ -105,10 +124,7 @@ public class GameController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.25f);
         m_StartText.gameObject.SetActive(false);
-
     }
-
-
 
     void AllDead()
     {
@@ -119,7 +135,7 @@ public class GameController : MonoBehaviour
             m_MainCam.gameObject.GetComponent<ThirdPersonOrbitCam>().enabled = false;
             m_MainCam.enabled = false;
             m_DeadText.gameObject.SetActive(true);
-            StartCoroutine(FinishLevel());
+            StartCoroutine(FinishLevel(false));
         }
     }
 }
