@@ -77,6 +77,28 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            PlayerTracker.m_NumActivePlayers = 1;
+            Restart();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            PlayerTracker.m_NumActivePlayers = 2;
+            Restart();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            PlayerTracker.m_NumActivePlayers = 3;
+            Restart();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            PlayerTracker.m_NumActivePlayers = 4;
+            Restart();
+        }
 
         if (m_Init && AllPlayersDead())
         {
