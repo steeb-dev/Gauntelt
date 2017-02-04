@@ -7,10 +7,19 @@ public enum CombatType
     Melee,
     Projectile
 }
+
+public enum EnemyState
+{
+    Chill,
+    Alert
+}
+
+
 public class EnemyController : Woundable
 {
+    public EnemyState m_State;
     public CombatType m_Type;
-
+    public float m_AlertRange;
     public ParticleSystem m_PSys;
     private Animator m_Anim;
     private Rigidbody m_RigidBody;
@@ -23,15 +32,19 @@ public class EnemyController : Woundable
     public float m_AttackRange = 1f;
     public bool m_Attacking;
     public BatController m_Bat;
+    public GameObject m_ProjectilePrefab;
+
     private int movingBool;
     Rigidbody[] rigidBodies;
     public AudioClip m_RantClip;
     public int m_ScoreVal;
     private GameController m_GameController;
+    public CombatType m_CombatType;
 
     // Use this for initialization
     void Start ()
     {
+        m_State = EnemyState.Alert;
         m_GameController = FindObjectOfType<GameController>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
         movingBool = Animator.StringToHash("Moving");
@@ -55,16 +68,19 @@ public class EnemyController : Woundable
     // Update is called once per frame
     void Update()
     {
-        if(m_TargetPlayer == null || m_TargetPlayer.m_Dead)
+        if (m_State == EnemyState.Alert)
         {
-            m_TargetPlayer = m_GameController.GetTargetPlayer(transform.position);
-        }
-        if (m_TargetPlayer != null)
-        {
-            m_PlayerDirection = m_TargetPlayer.transform.position - m_RigidBody.position;
-            m_PlayerDirection.Normalize();
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(m_PlayerDirection), m_TurnSpeed * Time.deltaTime);           
-        }  
+            if (m_TargetPlayer == null || m_TargetPlayer.m_Dead)
+            {
+                m_TargetPlayer = m_GameController.GetTargetPlayer(transform.position);
+            }
+            if (m_TargetPlayer != null)
+            {
+                m_PlayerDirection = m_TargetPlayer.transform.position - m_RigidBody.position;
+                m_PlayerDirection.Normalize();
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(m_PlayerDirection), m_TurnSpeed * Time.deltaTime);
+            }
+        } 
     }
 
     void FixedUpdate()
@@ -86,14 +102,28 @@ public class EnemyController : Woundable
                 {
                     m_RigidBody.AddForce(-m_PlayerDirection * m_RunSpeed);
                     m_Anim.SetFloat(speedFloat, 0, 0.05f, Time.deltaTime);
-                    m_Attacking = true;                   
+                    m_Attacking = true;
                 }
                 else
                 {
-                    if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && !m_Anim.IsInTransition(0))
+                    switch (m_CombatType)
                     {
-                        m_Anim.SetTrigger("Attack");
-                        m_Bat.Attack();
+                        case CombatType.Melee:
+                            if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") && !m_Anim.IsInTransition(0))
+                            {
+                                m_Anim.SetTrigger("Attack");
+                                m_Bat.Attack();
+                            }
+                            break;
+                        case CombatType.Projectile:
+                            m_Bat.DeactivateCollider();
+                            if (!m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile") && !(m_Anim.IsInTransition(0) && m_Anim.GetNextAnimatorStateInfo(0).IsName("Projectile")))
+                            {
+                                m_Attacking = true;
+                                m_Anim.SetTrigger("Projectile");
+                                StartCoroutine(FireProjectile());
+                            }
+                            break;
                     }
                 }
             }
@@ -101,5 +131,25 @@ public class EnemyController : Woundable
         m_Anim.SetBool(movingBool, moving);
     }
 
-    
+    IEnumerator FireProjectile()
+    {
+        WaitForEndOfFrame waitForFrame = new WaitForEndOfFrame();
+        bool loop = true;
+        while (loop)
+        {
+            if (m_Anim.GetCurrentAnimatorStateInfo(0).IsName("Projectile") || (m_Anim.GetNextAnimatorStateInfo(0).IsName("Projectile") && m_Anim.IsInTransition(0)))
+            {
+                loop = false;
+            }
+            yield return waitForFrame;
+        }
+        Vector3 trajectory = transform.forward;
+        GameObject pObj = Instantiate(m_ProjectilePrefab);
+        pObj.transform.position = this.transform.position;
+        Projectile p = pObj.GetComponent<Projectile>();
+        p.m_Player = this.gameObject;
+        p.Init(trajectory);
+        m_Attacking = false;
+    }
+
 }

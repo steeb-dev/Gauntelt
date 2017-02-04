@@ -57,7 +57,7 @@ public class PlayerBehaviour : Woundable
 
     public IEnumerator FinishAnim()
     {
-        m_Finish = true;
+        m_Invincible = true;
         m_Anim.SetBool(movingBool, false);
         rbody.ResetCenterOfMass();
         rbody.ResetInertiaTensor();

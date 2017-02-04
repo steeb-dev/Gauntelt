@@ -16,7 +16,6 @@ public class GameController : MonoBehaviour
     public Camera m_DeathCam;
     public Camera m_MainCam;
     public int m_CurrentLevel = 0;
-    public int m_LevelCount = 1;
 
     private bool m_AllDead =false;
     public float m_ExitTime = 1.5f;
@@ -30,8 +29,10 @@ public class GameController : MonoBehaviour
         }
         yield return new WaitForSeconds(m_ExitTime);
         m_CurrentLevel++;
-        if(m_CurrentLevel >= m_LevelCount)
+        if(m_CurrentLevel >= PlayerTracker. m_LevelCount)
         { m_CurrentLevel = 0; }
+
+        PlayerTracker.SetStats(this);
         UnityEngine.SceneManagement.SceneManager.LoadScene(m_CurrentLevel, UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
@@ -61,7 +62,15 @@ public class GameController : MonoBehaviour
         }
 
         if (Input.GetButtonDown("Restart"))
-            UnityEngine.SceneManagement.SceneManager.LoadScene(m_CurrentLevel, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        {
+            Restart();
+        }
+    }
+
+    void Restart()
+    {
+        PlayerTracker.Reset();
+        UnityEngine.SceneManagement.SceneManager.LoadScene(m_CurrentLevel, UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     bool AllPlayersDead()
@@ -88,6 +97,7 @@ public class GameController : MonoBehaviour
             m_Players.Add(player.GetComponent<PlayerBehaviour>());
 
         }
+        PlayerTracker.Init(this);
         m_Init = true;
     }
 

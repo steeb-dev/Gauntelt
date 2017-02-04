@@ -8,6 +8,7 @@ using UnityEngine;
 public class Woundable : MonoBehaviour
 {
     public int m_HP;
+    public bool m_Invincible;
     public bool m_Dead;
     public Color m_HitColor;
     public Color m_DefaultColor;
@@ -29,7 +30,7 @@ public class Woundable : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!m_Dead)
+        if (!m_Dead && !m_Invincible)
         {
             string ownerTag = "";
             GameObject ownerObject = other.gameObject;
@@ -42,8 +43,11 @@ public class Woundable : MonoBehaviour
                 BatController bc = other.gameObject.GetComponent<BatController>();
                 damage = (int)bc.GetDamage();
                 bc.PlaySound();
-                ownerTag = bc.m_Player.gameObject.tag;
-                ownerObject = bc.m_Player.gameObject;
+                if (bc.m_Player.gameObject != null)
+                {
+                    ownerTag = bc.m_Player.gameObject.tag;
+                    ownerObject = bc.m_Player.gameObject;
+                }
             }
             else if (other.gameObject.tag == "Projectile")
             {
@@ -52,8 +56,11 @@ public class Woundable : MonoBehaviour
                 {
                     damage = (int)p.GetDamage();
                     p.PlaySound();
-                    ownerTag = p.m_Player.gameObject.tag;
-                    ownerObject = p.m_Player.gameObject;
+                    if (p.m_Player.gameObject != null)
+                    {
+                        ownerTag = p.m_Player.gameObject.tag;
+                        ownerObject = p.m_Player.gameObject;
+                    }
                 }
             }
             if (damage > 0 && ownerTag != this.gameObject.tag)
@@ -108,7 +115,10 @@ public class Woundable : MonoBehaviour
             ragdoll.transform.rotation = this.transform.rotation;
             ragdoll.transform.localScale = this.transform.localScale;
         }
-        Destroy(this.gameObject);
+        if (this.gameObject.tag != "Player")
+        {
+            Destroy(this.gameObject);
+        }
     }
 
 }
