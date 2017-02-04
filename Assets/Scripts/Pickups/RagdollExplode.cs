@@ -5,7 +5,7 @@ using UnityEngine;
 public class RagdollExplode : MonoBehaviour
 {
     private float m_Timer = 0f;
-    private float m_LifeTime = 225f;
+    private float m_LifeTime = 40f;
     // Use this for initialization
     void Awake()
     {
