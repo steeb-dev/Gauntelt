@@ -21,20 +21,18 @@ public class GameController : MonoBehaviour
     public float m_ExitTime = 1.5f;
     private bool m_Init = false;
 
-    public IEnumerator FinishLevel(bool goNext)
+    public IEnumerator FinishLevel()
     {
         foreach (PlayerBehaviour pb in m_Players)
         {
             StartCoroutine(pb.FinishAnim());
         }
         yield return new WaitForSeconds(m_ExitTime);
-        if (goNext)
-        {
-            m_CurrentLevel++;
-            PlayerTracker.SetStats(this);
-        }
 
-        if (m_CurrentLevel >= PlayerTracker. m_LevelCount)
+        m_CurrentLevel++;
+        PlayerTracker.SetStats(this);
+
+        if (m_CurrentLevel >= PlayerTracker.m_LevelCount)
         { m_CurrentLevel = 0; }
 
         UnityEngine.SceneManagement.SceneManager.LoadScene(m_CurrentLevel, UnityEngine.SceneManagement.LoadSceneMode.Single);
@@ -46,12 +44,16 @@ public class GameController : MonoBehaviour
         PlayerBehaviour closestPlayer = m_Players[0];
         foreach (PlayerBehaviour pb in m_Players)
         {
-            float distance = Vector3.Distance(position, pb.transform.position);
-
-            if (distance < minDist)
+            if (pb != null)
             {
-                minDist = distance;
-                closestPlayer = pb;
+
+                float distance = Vector3.Distance(position, pb.transform.position);
+
+                if (distance < minDist)
+                {
+                    minDist = distance;
+                    closestPlayer = pb;
+                }
             }
         }
         return closestPlayer;
@@ -62,11 +64,14 @@ public class GameController : MonoBehaviour
         float minDist = 1000000f;
         foreach (PlayerBehaviour pb in m_Players)
         {
-            float distance = Vector3.Distance(position, pb.transform.position);
-
-            if (distance < minDist)
+            if (pb != null)
             {
-                minDist = distance;
+                float distance = Vector3.Distance(position, pb.transform.position);
+
+                if (distance < minDist)
+                {
+                    minDist = distance;
+                }
             }
         }
         return minDist;
@@ -86,6 +91,12 @@ public class GameController : MonoBehaviour
         }
     }
 
+    IEnumerator RestartAfterDelay()
+    {
+        yield return new WaitForSeconds(m_ExitTime);
+        Restart();
+    }
+
     void Restart()
     {
         PlayerTracker.Reset();
@@ -96,7 +107,7 @@ public class GameController : MonoBehaviour
     {
         foreach (PlayerBehaviour pb in m_Players)
         {
-            if (!pb.m_Dead)
+            if (pb != null && !pb.m_Dead)
             { return false; }
         }
         return true;
@@ -135,7 +146,7 @@ public class GameController : MonoBehaviour
             m_MainCam.gameObject.GetComponent<ThirdPersonOrbitCam>().enabled = false;
             m_MainCam.enabled = false;
             m_DeadText.gameObject.SetActive(true);
-            StartCoroutine(FinishLevel(false));
+            StartCoroutine(RestartAfterDelay());
         }
     }
 }

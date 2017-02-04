@@ -120,10 +120,7 @@ public class Woundable : MonoBehaviour
             ragdoll.transform.rotation = this.transform.rotation;
             ragdoll.transform.localScale = this.transform.localScale;
         }
-        if (this.gameObject.tag != "Player")
-        {
-            Destroy(this.gameObject);
-        }
+        Destroy(this.gameObject);
     }
 
 }
