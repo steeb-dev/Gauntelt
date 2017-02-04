@@ -41,8 +41,9 @@ public class EnemyController : Woundable
     public CombatType m_CombatType;
 
     // Use this for initialization
-    void Start ()
+    public override void Start()
     {
+        base.Start();
         m_GameController = FindObjectOfType<GameController>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
         movingBool = Animator.StringToHash("Moving");

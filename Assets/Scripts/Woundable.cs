@@ -23,7 +23,7 @@ public class Woundable : MonoBehaviour
     public delegate void HitConfirm(GameObject other);
     public KillConfirm OnHitConfirm;
 
-    private void Start()
+    public virtual void Start()
     {
         m_Source = GetComponent<AudioSource>();
         m_MeshRenderer.materials[0].color = m_DefaultColor;

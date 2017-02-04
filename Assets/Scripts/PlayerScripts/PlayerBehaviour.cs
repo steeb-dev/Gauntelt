@@ -37,8 +37,9 @@ public class PlayerBehaviour : Woundable
     public GameObject m_PlayerUIPrefab;
 
     // Start is always called after any Awake functions.
-    void Start()
+    public override void Start()
     {
+        base.Start();
         GameObject UI = Instantiate(m_PlayerUIPrefab);
         UI.GetComponent<PlayerUI>().m_Player = this;
         UI.transform.parent = GameObject.Find("PlayerUIPanel").transform;

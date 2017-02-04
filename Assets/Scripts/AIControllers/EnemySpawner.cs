@@ -7,6 +7,11 @@ public class EnemySpawner : Woundable {
     public GameObject m_Enemy;
     private float m_Timer = 0f;
     private ParticleSystem m_PSys;
+    // Use this for initialization
+    public override void Start()
+    {
+        base.Start();
+    }
 
     public int m_ScoreVal;
     // Use this for initialization

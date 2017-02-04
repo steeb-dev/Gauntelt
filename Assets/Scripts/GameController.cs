@@ -10,9 +10,7 @@ public class GameController : MonoBehaviour
 
     public UnityEngine.UI.Text m_DeadText;
     public UnityEngine.UI.Text m_StartText;
-
-    public int m_NumActivePlayers = 2;
-
+   
     public Camera m_DeathCam;
     public Camera m_MainCam;
     public int m_CurrentLevel = 0;
@@ -120,7 +118,7 @@ public class GameController : MonoBehaviour
         m_DeathCam.enabled = false;
         m_MainCam.enabled = true;
         GameObject startSpawn = GameObject.FindGameObjectWithTag("Spawn");
-        for (int i = 0; i < m_NumActivePlayers; i++)
+        for (int i = 0; i < PlayerTracker.m_NumActivePlayers; i++)
         {
             GameObject player = Instantiate(m_PlayerPrefabs[i]);
             player.transform.position = startSpawn.transform.position;
