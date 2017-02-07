@@ -6,7 +6,7 @@ using System.Text;
 
 public static class PlayerTracker
 {
-    public static int m_NumActivePlayers = 2;
+    public static int m_NumActivePlayers = 1;
     public static int m_LevelCount = 3;
     public static PlayerStats[] m_Stats;
     public static bool m_Init = false;
